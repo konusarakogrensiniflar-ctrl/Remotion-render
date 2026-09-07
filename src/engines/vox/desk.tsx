@@ -16,9 +16,12 @@ export function posterizeTime(frame: number, step = 2): number {
   return Math.floor(frame / step) * step;
 }
 
+export type CameraMotion = "drift" | "panRight" | "panLeft" | "pushIn" | "pullBack" | "macroScan";
+
 /**
  * DeskPerspective — Sahneye gerçekçi izometrik / açılı dedektif masası derinliği verir.
  * CPU render'da sıfır maliyetle çalışır.
+ * cameraMotion ile masada sinematik kamera hareketleri (pan, pushIn, macroScan) sağlar.
  */
 export const DeskPerspective: React.FC<{
   children: React.ReactNode;
@@ -26,6 +29,7 @@ export const DeskPerspective: React.FC<{
   tiltY?: number; // Örn: -4 - 4 derece
   depth?: number;
   drift?: boolean; // Yaşayan kamera nefes alması
+  cameraMotion?: CameraMotion;
   style?: React.CSSProperties;
 }> = ({
   children,
@@ -33,15 +37,38 @@ export const DeskPerspective: React.FC<{
   tiltY = -3,
   depth = 0,
   drift = true,
+  cameraMotion = "drift",
   style,
 }) => {
   const frame = useCurrentFrame();
 
-  // Kameranın masada çok hafif, yaşayan bir hareketle gezinmesi (asla donuk kalmaz)
+  // Temel yaşayan kamera nefes alması (asla donuk kalmaz)
   const driftX = drift ? Math.sin(frame / 65) * 0.8 : 0;
   const driftY = drift ? Math.cos(frame / 75) * 0.6 : 0;
-  const panX = drift ? Math.sin(frame / 120) * 16 : 0;
-  const panY = drift ? (frame * 0.12) % 20 : 0;
+
+  // Kameranın masadaki sinematik seyahati (Kamera Koreografisi)
+  let motionX = 0;
+  let motionY = 0;
+  let motionZoom = 1;
+
+  if (cameraMotion === "panRight") {
+    motionX = interpolate(frame, [0, 180], [-45, 45], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  } else if (cameraMotion === "panLeft") {
+    motionX = interpolate(frame, [0, 180], [45, -45], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  } else if (cameraMotion === "pushIn") {
+    motionZoom = interpolate(frame, [0, 160], [1, 1.14], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+    motionY = interpolate(frame, [0, 160], [0, -18], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  } else if (cameraMotion === "pullBack") {
+    motionZoom = interpolate(frame, [0, 160], [1.12, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  } else if (cameraMotion === "macroScan") {
+    motionX = interpolate(frame, [0, 180], [-35, 35], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+    motionY = interpolate(frame, [0, 180], [20, -20], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+    motionZoom = interpolate(frame, [0, 180], [1.06, 1.12], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  } else {
+    // Klasik hafif gezinme
+    motionX = drift ? Math.sin(frame / 120) * 16 : 0;
+    motionY = drift ? (frame * 0.12) % 20 : 0;
+  }
 
   return (
     <div
@@ -64,7 +91,7 @@ export const DeskPerspective: React.FC<{
           alignItems: "center",
           justifyContent: "center",
           transformStyle: "preserve-3d",
-          transform: `rotateX(${tiltX + driftY}deg) rotateY(${tiltY + driftX}deg) translateZ(${depth}px) translate(${panX}px, ${panY}px)`,
+          transform: `scale(${motionZoom}) rotateX(${tiltX + driftY}deg) rotateY(${tiltY + driftX}deg) translateZ(${depth}px) translate(${motionX}px, ${motionY}px)`,
           transition: "transform 0.1s ease-out",
         }}
       >

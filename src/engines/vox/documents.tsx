@@ -1,6 +1,6 @@
 import React from "react";
-import { Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import { INK, RED, HEADLINE, SERIF, hash } from "./palette";
+import { Easing, interpolate, spring, useCurrentFrame, useVideoConfig, Img, staticFile } from "remotion";
+import { INK, RED, PAPER, HEADLINE, SERIF, hash } from "./palette";
 
 /**
  * documents.tsx — Delil & Arşiv Katmanı (Evidence & Archival Documents)
@@ -439,6 +439,292 @@ export const DeclassifiedFile: React.FC<{
         <span> CONFIRMED AT LOCATION: </span>
         <RedactedBar startFrame={startFrame + 16} width={170} height={18} />
         <span>. FURTHER ACTION PENDING CLEARANCE.</span>
+      </div>
+    </div>
+  );
+};
+
+// ── 6. YIRTIK KAĞIT KENARI (TORN PAPER EDGE) ──────────────────────────────
+
+/**
+ * TornEdge — Gerçekçi yırtılmış kağıt kenarı (lifli / pürüzlü doku).
+ * Belge veya gazete kupürlerinin alt/üst kenarlarına pürüzlü gerçekçilik katar.
+ */
+export const TornEdge: React.FC<{
+  width?: number | string;
+  height?: number;
+  position?: "top" | "bottom";
+  color?: string;
+  style?: React.CSSProperties;
+}> = ({ width = "100%", height = 12, position = "bottom", color = "#EDE9DF", style }) => {
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        [position]: -height + 1,
+        width,
+        height,
+        overflow: "hidden",
+        pointerEvents: "none",
+        zIndex: 5,
+        ...style,
+      }}
+    >
+      <svg
+        viewBox="0 0 1200 24"
+        preserveAspectRatio="none"
+        style={{
+          width: "100%",
+          height: "100%",
+          transform: position === "top" ? "scaleY(-1)" : "none",
+        }}
+      >
+        <path
+          d="M 0,0 L 0,6 Q 30,18 60,8 T 120,12 T 180,6 T 240,16 T 300,7 T 360,14 T 420,5 T 480,15 T 540,8 T 600,16 T 660,7 T 720,14 T 780,6 T 840,15 T 900,8 T 960,14 T 1020,6 T 1080,15 T 1140,8 T 1200,12 L 1200,0 Z"
+          fill={color}
+        />
+      </svg>
+    </div>
+  );
+};
+
+// ── 7. POLAROID / KANIT FOTOĞRAFI (POLAROID PHOTO CARD) ───────────────────
+
+/**
+ * PolaroidCard — Johnny Harris / Vox tarzı masaya fırlatılan Polaroid kanıt fotoğrafı.
+ * - Karanlıktan renge doğru banyo olma (film development) efekti.
+ * - Alt beyaz kenarlıkta daktilo / el yazısı açıklama ve tarih.
+ * - Üstte şeffaf bant parçası.
+ */
+export const PolaroidCard: React.FC<{
+  asset?: string;
+  label?: string;
+  sublabel?: string;
+  startFrame: number;
+  width?: number;
+  rotate?: number;
+  tint?: string;
+}> = ({
+  asset,
+  label,
+  sublabel = "ARCHIVAL EVIDENCE",
+  startFrame,
+  width = 380,
+  rotate = -3.5,
+  tint = RED,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const drop = spring({
+    frame: frame - startFrame,
+    fps,
+    config: { damping: 14, mass: 0.8, stiffness: 120 },
+    durationInFrames: 24,
+  });
+
+  const op = interpolate(frame, [startFrame, startFrame + 8], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  // Polaroid banyo olma efekti (karanlık/sepia'dan yavaş yavaş net renge açılma)
+  const develop = interpolate(frame, [startFrame + 4, startFrame + 38], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
+  });
+
+  const photoBrightness = interpolate(develop, [0, 1], [0.35, 1]);
+  const photoContrast = interpolate(develop, [0, 1], [0.7, 1.12]);
+  const photoSepia = interpolate(develop, [0, 1], [0.8, 0.15]);
+
+  const y = interpolate(drop, [0, 1], [80, 0]);
+  const rot = interpolate(drop, [0, 1], [rotate * 1.8, rotate]);
+
+  const photoHeight = Math.round(width * 0.96);
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        width,
+        background: "#F7F6F1",
+        padding: "16px 16px 26px 16px",
+        boxShadow: "0 20px 42px rgba(26, 20, 14, 0.38), 0 3px 10px rgba(0,0,0,0.18)",
+        border: "1px solid rgba(0,0,0,0.12)",
+        transform: `translateY(${y}px) rotate(${rot}deg)`,
+        opacity: op,
+        zIndex: 12,
+      }}
+    >
+      {/* Üst Koli Bandı */}
+      <Tape width={100} height={28} rotate={1.5} style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%) rotate(1.5deg)" }} />
+
+      {/* Fotoğraf Alanı */}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: photoHeight,
+          background: "#1E1A16",
+          overflow: "hidden",
+          boxShadow: "inset 0 0 12px rgba(0,0,0,0.6)",
+        }}
+      >
+        {asset ? (
+          <Img
+            src={staticFile(asset)}
+            alt=""
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              filter: `brightness(${photoBrightness}) contrast(${photoContrast}) sepia(${photoSepia})`,
+              transform: `scale(${1.02 + develop * 0.03})`,
+            }}
+          />
+        ) : (
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#666" }}>
+            <span style={{ fontFamily: HEADLINE, fontSize: 24, fontWeight: 900 }}>EVIDENCE STILL</span>
+          </div>
+        )}
+
+        {/* Polaroid film parlama tabakası */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%)",
+            pointerEvents: "none",
+          }}
+        />
+      </div>
+
+      {/* Alt Beyaz Çene / El Yazısı Etiket */}
+      <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 3, paddingInline: 4 }}>
+        {label ? (
+          <div
+            style={{
+              fontFamily: HEADLINE,
+              fontWeight: 900,
+              fontSize: 22,
+              letterSpacing: 1,
+              color: INK,
+              textTransform: "uppercase",
+            }}
+          >
+            {label}
+          </div>
+        ) : null}
+        <div
+          style={{
+            fontFamily: SERIF,
+            fontStyle: "italic",
+            fontWeight: 700,
+            fontSize: 13,
+            color: tint,
+            letterSpacing: 0.5,
+          }}
+        >
+          {sublabel}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── 8. KÜTÜPHANE KAYNAK FİŞİ / DİPNOT (SOURCE FOOTNOTE / CITATION BADGE) ───
+
+/**
+ * SourceFootnote — İddiaları akademik veya resmi bir kaynağa dayandıran
+ * kütüphane fişi / dipnot rozeti. Ekranın köşesine yerleşir ve güvenilirlik katar.
+ */
+export const SourceFootnote: React.FC<{
+  sourceText: string;
+  subText?: string;
+  startFrame?: number;
+  position?: "bottom-left" | "bottom-right";
+}> = ({
+  sourceText,
+  subText = "PRIMARY SOURCE VERIFICATION",
+  startFrame = 12,
+  position = "bottom-left",
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const slide = spring({
+    frame: frame - startFrame,
+    fps,
+    config: { damping: 14, mass: 0.6, stiffness: 140 },
+    durationInFrames: 20,
+  });
+
+  const op = interpolate(frame, [startFrame, startFrame + 6], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  const xOffset = position === "bottom-left"
+    ? interpolate(slide, [0, 1], [-80, 0])
+    : interpolate(slide, [0, 1], [80, 0]);
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: 34,
+        [position === "bottom-left" ? "left" : "right"]: 36,
+        display: "flex",
+        alignItems: "stretch",
+        gap: 0,
+        background: PAPER,
+        border: `2px solid ${INK}`,
+        boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+        transform: `translateX(${xOffset}px)`,
+        opacity: op,
+        zIndex: 50,
+        maxWidth: 520,
+        pointerEvents: "none",
+      }}
+    >
+      {/* Sol Kırmızı Şerit */}
+      <div
+        style={{
+          width: 8,
+          background: RED,
+        }}
+      />
+      <div style={{ padding: "8px 16px 8px 12px", display: "flex", flexDirection: "column", gap: 2 }}>
+        <div
+          style={{
+            fontFamily: HEADLINE,
+            fontWeight: 900,
+            fontSize: 10,
+            letterSpacing: 2,
+            color: RED,
+            textTransform: "uppercase",
+          }}
+        >
+          {subText}
+        </div>
+        <div
+          style={{
+            fontFamily: SERIF,
+            fontWeight: 700,
+            fontSize: 15,
+            color: INK,
+            letterSpacing: 0.3,
+            lineHeight: 1.2,
+          }}
+        >
+          {sourceText}
+        </div>
       </div>
     </div>
   );

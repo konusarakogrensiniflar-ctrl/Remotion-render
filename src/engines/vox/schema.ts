@@ -19,7 +19,9 @@ export type VoxArchetype =
   | "document"
   | "map"
   | "dataviz"
-  | "network";
+  | "network"
+  | "trendline"
+  | "flow";
 
 export type VImage = { path: string; prompt: string; style: "cutout" | "card"; cut?: string };
 export type Beat = {
@@ -37,6 +39,9 @@ export type Beat = {
     title?: string;
     author?: string;
     compareLabels?: string[];
+    sourceRef?: string;
+    trendPoints?: { label: string; year?: string; value: number }[];
+    flowNodes?: { label: string; sub?: string }[];
     /**
      * SUB-BEAT EVENT CLOCK (see AGENT_LOG 2026-09-03 "visual event rate").
      * Frames — RELATIVE to the beat's start — at which this beat's on-screen

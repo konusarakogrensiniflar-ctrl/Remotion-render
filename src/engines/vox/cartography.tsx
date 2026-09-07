@@ -188,7 +188,84 @@ export const DropPin: React.FC<{
   );
 };
 
-// ── 4. ANA HARİTA BİLEŞENİ (GEOMAP) ────────────────────────────────────────
+// ── 4. KATLANMIŞ HARİTA İZLERİ (MAP CREASES & PAPER FOLDS) ────────────────
+
+/**
+ * MapCreases — 4'e katlanmış fiziksel harita katlama izleri ve gölgeleri (Quad-Fold Paper Creases)
+ * Masaya açılmış dedektif haritası hissini pekiştirir.
+ */
+export const MapCreases: React.FC<{
+  width?: number | string;
+  height?: number | string;
+  opacity?: number;
+}> = ({ width = "100%", height = "100%", opacity = 0.55 }) => {
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: "absolute",
+        inset: 0,
+        width,
+        height,
+        pointerEvents: "none",
+        zIndex: 15,
+        opacity,
+      }}
+    >
+      {/* Yatay Kat İzi (Orta çizgi: üstü açık, altı gölge) */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: 0,
+          right: 0,
+          height: 2,
+          background: "linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(0,0,0,0.3) 100%)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          transform: "translateY(-50%)",
+        }}
+      />
+      {/* Dikey Kat İzi (Orta çizgi: solu açık, sağı gölge) */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: "50%",
+          width: 2,
+          background: "linear-gradient(to right, rgba(255,255,255,0.7) 0%, rgba(0,0,0,0.3) 100%)",
+          boxShadow: "1px 0 3px rgba(0,0,0,0.2)",
+          transform: "translateX(-50%)",
+        }}
+      />
+      {/* 4 Çeyrek Köşe Kırışıklık Gölgeleri */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.08) 100%), linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%, rgba(0,0,0,0.06) 100%)",
+        }}
+      />
+      {/* Kat Kesim Noktası (Merkez Aşınması) */}
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: 8,
+          height: 8,
+          borderRadius: "50%",
+          background: "rgba(0,0,0,0.25)",
+          transform: "translate(-50%, -50%)",
+          filter: "blur(1px)",
+        }}
+      />
+    </div>
+  );
+};
+
+// ── 5. ANA HARİTA BİLEŞENİ (GEOMAP) ────────────────────────────────────────
 
 export const GeoMap: React.FC<{
   startFrame: number;
@@ -197,6 +274,7 @@ export const GeoMap: React.FC<{
   targetLabel?: string;
   width?: number;
   height?: number;
+  showCreases?: boolean;
 }> = ({
   startFrame,
   highlightRegion = "world",
@@ -204,14 +282,26 @@ export const GeoMap: React.FC<{
   targetLabel,
   width = 1100,
   height = 620,
+  showCreases = true,
 }) => {
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const unfold = spring({
+    frame: frame - startFrame,
+    fps,
+    config: { damping: 14, mass: 0.8, stiffness: 120 },
+    durationInFrames: 24,
+  });
 
   const drawIn = interpolate(frame, [startFrame, startFrame + 24], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.cubic),
   });
+
+  const scale = interpolate(unfold, [0, 1], [0.94, 1]);
+  const rot = interpolate(unfold, [0, 1], [1.5, 0]);
 
   return (
     <div
@@ -223,9 +313,12 @@ export const GeoMap: React.FC<{
         border: `3px solid ${INK}`,
         boxShadow: "0 22px 50px rgba(30,24,18,0.3), inset 0 0 80px rgba(0,0,0,0.06)",
         overflow: "hidden",
+        transform: `scale(${scale}) rotate(${rot}deg)`,
         zIndex: 10,
       }}
     >
+      {showCreases ? <MapCreases /> : null}
+
       <svg
         width={width}
         height={height}

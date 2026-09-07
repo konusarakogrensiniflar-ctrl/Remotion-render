@@ -12,6 +12,7 @@ import {
 import type { Beat } from "./schema";
 import { PAPER, INK, RED, HEADLINE, CAPTION_BAND, hash } from "./palette";
 import { AccentBurst } from "./backgrounds";
+import { SourceFootnote } from "./documents";
 
 /**
  * beatAnchors — the sub-beat event clock for an archetype.
@@ -137,6 +138,9 @@ export const Scene: React.FC<{ beat: Beat; children: React.ReactNode; accent?: b
       {bleed}
       {accent ? <AccentBurst seed={seed} x={35 + seed * 30} y={44} /> : null}
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", paddingBottom: CAPTION_BAND, paddingInline: 130, zIndex: 10 }}>{children}</AbsoluteFill>
+      {beat.props.sourceRef ? (
+        <SourceFootnote sourceText={beat.props.sourceRef} startFrame={14} />
+      ) : null}
     </AbsoluteFill>
   );
 };

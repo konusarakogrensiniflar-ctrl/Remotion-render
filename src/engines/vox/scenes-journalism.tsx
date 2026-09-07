@@ -5,7 +5,7 @@ import { Scene, beatAnchors, KickerChip } from "./shared";
 import { NewspaperHeadline, DeclassifiedFile } from "./documents";
 import { DeskPerspective } from "./desk";
 import { GeoMap } from "./cartography";
-import { ScaleMatrix, ComparativeBarChart, BalanceScale, NetworkGraph } from "./infographics";
+import { ScaleMatrix, ComparativeBarChart, BalanceScale, NetworkGraph, AnnotatedTrendline, InfluenceFlow } from "./infographics";
 
 /**
  * scenes-journalism.tsx — Vox Engine 2.0 Gazetecilik Sahne Arke tipleri
@@ -162,6 +162,62 @@ export const NetworkScene: React.FC<{ beat: Beat }> = ({ beat }) => {
         <KickerChip text={kicker} startFrame={2} align="center" />
         <DeskPerspective tiltX={12} tiltY={-2} drift={true}>
           <NetworkGraph nodes={nodes} links={links} startFrame={at[0]} />
+        </DeskPerspective>
+      </div>
+    </Scene>
+  );
+};
+
+// ── 5. TRENDLINE SCENE (Tarihsel Çizgi Grafiği & Scrubber) ────────────────
+
+export const TrendlineScene: React.FC<{ beat: Beat }> = ({ beat }) => {
+  const at = beatAnchors(beat, 2, 4, 16);
+  const kicker = beat.props.kicker || "HISTORICAL TRAJECTORY";
+
+  // VTT metninden yıl ve noktaları tespit et veya default oluştur
+  const years = (beat.props.text.match(/\b(19\d\d|20\d\d)\b/g) || []).slice(0, 4);
+  const words = beat.props.emphasis.length ? beat.props.emphasis : beat.props.keywords.slice(0, 4).map((k) => k.toUpperCase());
+
+  const points = beat.props.trendPoints || [
+    { label: words[0] || "BASELINE", year: years[0] || "START", value: 24 },
+    { label: words[1] || "ACCELERATION", year: years[1] || "SURGE", value: 58 },
+    { label: words[2] || "TURNING POINT", year: years[2] || "INFLECTION", value: 42 },
+    { label: words[3] || "PEAK / TODAY", year: years[3] || "RECORD", value: 89, isHighlight: true },
+  ];
+
+  return (
+    <Scene beat={beat} accent={false}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, zIndex: 12 }}>
+        <KickerChip text={kicker} startFrame={2} align="center" />
+        <DeskPerspective tiltX={11} tiltY={-1} drift={true}>
+          <AnnotatedTrendline points={points} title={words.slice(0, 2).join(" ") || "TIMELINE DATA"} startFrame={at[0]} />
+        </DeskPerspective>
+      </div>
+    </Scene>
+  );
+};
+
+// ── 6. FLOW SCENE (Sebep - Mekanizma - Sonuç Akışı) ────────────────────────
+
+export const FlowScene: React.FC<{ beat: Beat }> = ({ beat }) => {
+  const at = beatAnchors(beat, 2, 4, 16);
+  const kicker = beat.props.kicker || "SYSTEM MECHANISM";
+  const words = beat.props.emphasis.length >= 3 ? beat.props.emphasis : beat.props.keywords.slice(0, 3).map((k) => k.toUpperCase());
+
+  const stages = beat.props.flowNodes
+    ? beat.props.flowNodes.map((n) => ({ title: n.label, desc: n.sub }))
+    : [
+        { title: words[0] || "ROOT CAUSE", tag: "TRIGGER", desc: "Foundational catalyst driving the system" },
+        { title: words[1] || "THE MECHANISM", tag: "FRICTION", desc: "Structural pressure multiplying the effect" },
+        { title: words[2] || "SYSTEM IMPACT", tag: "OUTCOME", desc: "Unintended consequence across the environment" },
+      ];
+
+  return (
+    <Scene beat={beat} accent={false}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, zIndex: 12 }}>
+        <KickerChip text={kicker} startFrame={2} align="center" />
+        <DeskPerspective tiltX={13} tiltY={-2} drift={true}>
+          <InfluenceFlow stages={stages} startFrame={at[0]} />
         </DeskPerspective>
       </div>
     </Scene>

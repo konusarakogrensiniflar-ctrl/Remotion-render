@@ -327,3 +327,340 @@ export const NetworkGraph: React.FC<{
     </div>
   );
 };
+
+// ── 5. ANNOTATED TRENDLINE (TARİHSEL ÇİZGİ GRAFİĞİ & SCRUBBER) ─────────────
+
+export interface TrendPoint {
+  label: string;
+  year?: string;
+  value: number; // 0..100
+  isHighlight?: boolean;
+}
+
+/**
+ * AnnotatedTrendline — Vox'un veri gazeteciliğindeki en karakteristik çizgi grafiği.
+ * - Çizgi zamanla çizilir (animasyonlu SVG stroke).
+ * - Kritik dönüm noktalarında (inflection points) kırmızı iğneler ve açıklama kutuları belirir.
+ * - Sayısal eksen ve arka plan ızgarası ile gazete araştırma formatındadır.
+ */
+export const AnnotatedTrendline: React.FC<{
+  points: TrendPoint[];
+  title?: string;
+  startFrame: number;
+  width?: number;
+  height?: number;
+}> = ({
+  points,
+  title = "HISTORICAL TRAJECTORY",
+  startFrame,
+  width = 960,
+  height = 480,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const padX = 70;
+  const padY = 50;
+  const chartW = width - padX * 2;
+  const chartH = height - padY * 2;
+
+  // Koordinatları hesapla
+  const coords = points.map((p, i) => {
+    const x = padX + (i / Math.max(1, points.length - 1)) * chartW;
+    const y = padY + chartH - (p.value / 100) * chartH;
+    return { x, y, ...p };
+  });
+
+  // SVG path dize oluşturma
+  const pathD = coords.reduce((acc, pt, i) => {
+    if (i === 0) return `M ${pt.x},${pt.y}`;
+    const prev = coords[i - 1];
+    const cp1x = prev.x + (pt.x - prev.x) * 0.45;
+    const cp2x = prev.x + (pt.x - prev.x) * 0.55;
+    return `${acc} C ${cp1x},${prev.y} ${cp2x},${pt.y} ${pt.x},${pt.y}`;
+  }, "");
+
+  const totalLength = chartW * 1.35;
+
+  const drawProg = interpolate(frame, [startFrame + 6, startFrame + 34], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.cubic),
+  });
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        width,
+        height,
+        background: "rgba(255,255,255,0.65)",
+        border: `3px solid ${INK}`,
+        padding: "24px 30px",
+        boxShadow: "0 20px 45px rgba(24,18,12,0.18)",
+        zIndex: 12,
+      }}
+    >
+      {/* Üst Başlık */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+        <span style={{ fontFamily: HEADLINE, fontWeight: 900, fontSize: 24, color: INK, letterSpacing: 2, textTransform: "uppercase" }}>
+          {title}
+        </span>
+        <span style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 700, fontSize: 13, color: RED, letterSpacing: 1 }}>
+          DATA INDEX (BASE = 100)
+        </span>
+      </div>
+
+      <svg width={width} height={height - 70} viewBox={`0 0 ${width} ${height - 70}`} style={{ overflow: "visible" }}>
+        {/* Yatay Kılavuz Çizgileri */}
+        {[0, 25, 50, 75, 100].map((v, i) => {
+          const y = padY + chartH - (v / 100) * chartH;
+          return (
+            <g key={i} opacity={0.18}>
+              <line x1={padX} y1={y} x2={padX + chartW} y2={y} stroke={INK} strokeWidth={1} strokeDasharray="4 4" />
+              <text x={padX - 12} y={y + 4} textAnchor="end" fontSize={11} fontFamily={HEADLINE} fill={INK} fontWeight={700}>
+                {v}%
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Ana Veri Çizgisi */}
+        <path
+          d={pathD}
+          fill="none"
+          stroke={INK}
+          strokeWidth={5}
+          strokeDasharray={totalLength}
+          strokeDashoffset={totalLength * (1 - drawProg)}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* Kırmızı Vurgu Çizgisi */}
+        <path
+          d={pathD}
+          fill="none"
+          stroke={RED}
+          strokeWidth={3}
+          strokeDasharray={totalLength}
+          strokeDashoffset={totalLength * (1 - drawProg)}
+          strokeLinecap="round"
+          opacity={0.8}
+        />
+
+        {/* Veri Noktaları ve Dönüm Etiketleri */}
+        {coords.map((pt, i) => {
+          const ptTime = startFrame + 6 + Math.round((i / Math.max(1, coords.length - 1)) * 28);
+          const pop = spring({
+            frame: frame - ptTime,
+            fps,
+            config: { damping: 12, mass: 0.5, stiffness: 160 },
+            durationInFrames: 18,
+          });
+
+          if (drawProg < (i / Math.max(1, coords.length - 1)) * 0.9) return null;
+
+          const isHot = pt.isHighlight ?? (i === coords.length - 1 || i === Math.floor(coords.length / 2));
+
+          return (
+            <g key={i} transform={`translate(${pt.x}, ${pt.y}) scale(${pop})`}>
+              <circle cx={0} cy={0} r={isHot ? 8 : 5} fill={isHot ? RED : INK} stroke={PAPER} strokeWidth={2.5} />
+
+              {isHot ? (
+                <g transform="translate(0, -36)">
+                  <rect
+                    x={-75}
+                    y={-18}
+                    width={150}
+                    height={36}
+                    fill={INK}
+                    rx={4}
+                  />
+                  <polygon points="-8,18 8,18 0,26" fill={INK} />
+                  <text
+                    x={0}
+                    y={-2}
+                    textAnchor="middle"
+                    fill={PAPER}
+                    fontFamily={HEADLINE}
+                    fontWeight={900}
+                    fontSize={12}
+                    letterSpacing={1}
+                  >
+                    {pt.year ? `${pt.year}: ` : ""}{pt.label.toUpperCase()}
+                  </text>
+                  <text
+                    x={0}
+                    y={12}
+                    textAnchor="middle"
+                    fill={RED}
+                    fontFamily={HEADLINE}
+                    fontWeight={900}
+                    fontSize={11}
+                  >
+                    {pt.value}%
+                  </text>
+                </g>
+              ) : (
+                <text
+                  x={0}
+                  y={22}
+                  textAnchor="middle"
+                  fill={INK}
+                  fontFamily={HEADLINE}
+                  fontWeight={800}
+                  fontSize={12}
+                  opacity={0.7}
+                >
+                  {pt.year || pt.label}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
+
+// ── 6. INFLUENCE FLOW (SEBEP - MEKANİZMA - SONUÇ AKIŞ ŞEMASI) ─────────────
+
+export interface FlowStage {
+  title: string;
+  desc?: string;
+  tag?: string;
+  color?: string;
+}
+
+/**
+ * InfluenceFlow — Sebep-sonuç ilişkisini ve mekanizmayı gösteren animasyonlu akış şeması.
+ * [Başlatıcı / Catalyst] ──(akış)──> [Kaldıraç / Mechanism] ──(akış)──> [Sonuç / Outcome]
+ */
+export const InfluenceFlow: React.FC<{
+  stages: FlowStage[];
+  startFrame: number;
+  width?: number;
+}> = ({
+  stages,
+  startFrame,
+  width = 1040,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        width,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 20,
+        zIndex: 12,
+      }}
+    >
+      {stages.map((stg, i) => {
+        const stageStart = startFrame + i * 12;
+        const pop = spring({
+          frame: frame - stageStart,
+          fps,
+          config: { damping: 14, mass: 0.7, stiffness: 140 },
+          durationInFrames: 22,
+        });
+
+        const op = interpolate(frame, [stageStart, stageStart + 8], [0, 1], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        });
+
+        const cardColor = stg.color || (i === stages.length - 1 ? RED : INK);
+
+        return (
+          <React.Fragment key={i}>
+            {/* Aşama Kartı */}
+            <div
+              style={{
+                flex: 1,
+                background: "#FBF9F4",
+                border: `3px solid ${INK}`,
+                borderRadius: 6,
+                padding: "24px 20px",
+                boxShadow: "0 14px 34px rgba(24,18,12,0.22)",
+                transform: `scale(${interpolate(pop, [0, 1], [0.85, 1])})`,
+                opacity: op,
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                position: "relative",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span
+                  style={{
+                    background: cardColor,
+                    color: PAPER,
+                    fontFamily: HEADLINE,
+                    fontWeight: 900,
+                    fontSize: 12,
+                    letterSpacing: 2,
+                    padding: "3px 8px",
+                    borderRadius: 3,
+                  }}
+                >
+                  STEP {i + 1}
+                </span>
+                {stg.tag ? (
+                  <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13, color: RED, fontWeight: 700 }}>
+                    {stg.tag}
+                  </span>
+                ) : null}
+              </div>
+
+              <div
+                style={{
+                  fontFamily: HEADLINE,
+                  fontWeight: 900,
+                  fontSize: 26,
+                  color: INK,
+                  textTransform: "uppercase",
+                  lineHeight: 1.1,
+                  letterSpacing: 0.5,
+                }}
+              >
+                {stg.title}
+              </div>
+
+              {stg.desc ? (
+                <div style={{ fontFamily: SERIF, fontSize: 14, color: "#444", lineHeight: 1.35 }}>
+                  {stg.desc}
+                </div>
+              ) : null}
+            </div>
+
+            {/* İki Aşama Arasındaki Animasyonlu Akış Oku */}
+            {i < stages.length - 1 ? (
+              <div style={{ width: 50, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width={44} height={32} viewBox="0 0 44 32">
+                  <path
+                    d="M 0,16 L 34,16 M 24,6 L 34,16 L 24,26"
+                    fill="none"
+                    stroke={RED}
+                    strokeWidth={4}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity={interpolate(frame, [stageStart + 8, stageStart + 16], [0, 1], {
+                      extrapolateLeft: "clamp",
+                      extrapolateRight: "clamp",
+                    })}
+                  />
+                </svg>
+              </div>
+            ) : null}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+};

@@ -306,6 +306,8 @@ function heuristicDesign(text, i, total) {
   else if (/["“”]/.test(text)) type = "quote";
   else if (/(newspaper|headline|report|document|record|article|archive|dossier|official|classified|secret|investigation)/i.test(text)) type = "document";
   else if (/(route|flight|journey|travel|border|continent|territory|across the|from .* to)/i.test(text)) type = "map";
+  else if (/(trend|trajectory|surge|decline|over time|through the years|accelerat|historical|decade)/i.test(text) && /\b(19\d\d|20\d\d)\b/.test(text)) type = "trendline";
+  else if (/(mechanism|leads to|results in|causes|chain reaction|catalyst|drives the|domino effect|step by step)/i.test(text)) type = "flow";
   else if (/(\d+%\s|percent|ratio|proportion|statistic)/i.test(text)) type = "dataviz";
   else if (/(connected|relationship|network|conspiracy|tied to|linked to|web of|alliance|pact)/i.test(text)) type = "network";
   else if (placeName(text)) type = "place";
@@ -353,6 +355,8 @@ For each narration beat, design ONE scene. Output STRICT JSON: an array (same le
   "document" (newspaper headline, archival record, classified file, declassified memo or report),
   "map" (geography, country borders, travel routes, strategic territories or journey tracking),
   "dataviz" (data journalism, percentages, scale matrices, proportion of people/items, or comparative bar scales),
+  "trendline" (historical trajectory, economic or social trends across decades, inflection points),
+  "flow" (cause-and-effect mechanism, step-by-step pipeline from catalyst to structural friction to outcome),
   "network" (connection web, relationships between multiple characters/institutions, conspiracy board).
 - "kicker": 2-4 word ALL-CAPS label or "" (a section tag, not a sentence).
 - "emphasis": 1-3 SHORT ALL-CAPS words that will appear big on screen. Pick the most SPECIFIC, CONCRETE nouns from the beat — character names, place names, key terms, numbers, book-specific concepts. NEVER generic verbs (happens, becomes, realizes), adjectives (important, different), or common words. A proper noun alone ("ASHURA") beats a vague phrase ("THE MOMENT"). NEVER a full sentence.
@@ -510,6 +514,8 @@ function imagePrompt(subject, style) {
     else if (d.type === "place" || place) type = "place";
     else if (d.type === "document" || /(newspaper|headline|official record|classified|declassified|dossier|investigation)/i.test(texts[i])) type = "document";
     else if (d.type === "map" || /(flight|route|border|geography|journey across)/i.test(texts[i])) type = "map";
+    else if (d.type === "trendline" || (/(trend|trajectory|surge|decline|over time|through the years|decade)/i.test(texts[i]) && /\b(19\d\d|20\d\d)\b/.test(texts[i]))) type = "trendline";
+    else if (d.type === "flow" || /(chain reaction|mechanism of|leads to the|domino effect|step by step)/i.test(texts[i])) type = "flow";
     else if (d.type === "dataviz" || /(\d+%\s|percent|scale matrix|proportion of|ratio)/i.test(texts[i])) type = "dataviz";
     else if (d.type === "network" || /(conspiracy|network of|web of|connected to|allies with|alliance)/i.test(texts[i])) type = "network";
     else if (d.image && d.image.subject) type = "imagefocus";
@@ -545,7 +551,9 @@ function imagePrompt(subject, style) {
       return img;
     };
 
-    const props = { text: texts[i], kicker, emphasis, items, keywords: kws };
+    const sourceMatch = texts[i].match(/\b(?:according to|study by|research at|published in|harvard|stanford|in chapter \d+)\b[^,\.\;]{0,36}/i);
+    const sourceRef = sourceMatch ? sourceMatch[0].trim().toUpperCase() : undefined;
+    const props = { text: texts[i], kicker, emphasis, items, keywords: kws, ...(sourceRef ? { sourceRef } : {}) };
     if (i === 0) { props.title = TITLE; props.author = AUTHOR; if (!props.kicker) props.kicker = "BOOK BREAKDOWN"; }
 
     if (type === "compare") {

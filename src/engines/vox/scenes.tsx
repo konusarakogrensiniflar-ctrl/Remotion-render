@@ -6,7 +6,7 @@ import { AccentBurst } from "./backgrounds";
 import { Scene, KineticWords, MarkerUnderline, KickerChip, Cutout, HalftoneCard, BackdropImg, beatAnchors } from "./shared";
 import { Annotated, annotationFor } from "./annotations";
 import { QuestionScene, TimelineScene, PlaceScene, DuoScene, RevealScene } from "./scenes-narrative";
-import { DocumentScene, MapScene, DataVizScene, NetworkScene } from "./scenes-journalism";
+import { DocumentScene, MapScene, DataVizScene, NetworkScene, TrendlineScene, FlowScene } from "./scenes-journalism";
 
 const TitleScene: React.FC<{ beat: Beat }> = ({ beat }) => {
   const { title, author, kicker } = beat.props;
@@ -306,6 +306,7 @@ export const SCENES: Record<string, React.FC<{ beat: Beat }>> = {
   duo: DuoScene, reveal: RevealScene,
   // journalism & investigative archetypes — see scenes-journalism.tsx
   document: DocumentScene, map: MapScene, dataviz: DataVizScene, network: NetworkScene,
+  trendline: TrendlineScene, flow: FlowScene,
 };
 
-export { StatementScene, DocumentScene, MapScene, DataVizScene, NetworkScene };
+export { StatementScene, DocumentScene, MapScene, DataVizScene, NetworkScene, TrendlineScene, FlowScene };
