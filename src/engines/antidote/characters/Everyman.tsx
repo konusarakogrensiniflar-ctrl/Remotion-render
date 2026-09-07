@@ -191,16 +191,19 @@ export const Everyman: React.FC<{
                 backdrop happened to place furniture at the right x. */}
             {full && sit > 0.35 && (() => {
               // The plank must be WIDER than the garment or it hides behind the
-              // coat and the figure reads as standing. It also sits below the
-              // hem (y 610), in the gap where the thighs are.
-              const seatTop = HIP_Y + 44;
-              const legH = Math.max(20, 876 - hipY - (seatTop + 20));
+              // coat, and it must meet the HEM (y 610) rather than sit below it.
+              // Placed lower, the body never visibly touches the seat and the
+              // figure reads as standing behind a bench; at the hem the garment
+              // drapes over the front edge and the thighs come forward across
+              // it, which is what "sitting" looks like from the front.
+              const seatTop = HIP_Y + 6;
+              const legH = Math.max(20, 876 - hipY - (seatTop + 22));
               return (
                 <g fill="#6E6A62" opacity={0.95}>
-                  <rect x={54} y={seatTop} width={292} height={20} rx={8} />
-                  <rect x={72} y={seatTop + 20} width={18} height={legH} rx={6} />
-                  <rect x={310} y={seatTop + 20} width={18} height={legH} rx={6} />
-                  <rect x={90} y={seatTop + 20 + legH * 0.55} width={220} height={12} rx={5} opacity={0.75} />
+                  <rect x={46} y={seatTop} width={308} height={22} rx={8} />
+                  <rect x={64} y={seatTop + 22} width={18} height={legH} rx={6} />
+                  <rect x={318} y={seatTop + 22} width={18} height={legH} rx={6} />
+                  <rect x={82} y={seatTop + 22 + legH * 0.55} width={236} height={12} rx={5} opacity={0.75} />
                 </g>
               );
             })()}
