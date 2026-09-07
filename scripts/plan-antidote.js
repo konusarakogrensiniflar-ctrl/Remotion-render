@@ -23,6 +23,7 @@ const { rel, abs, ensureBookDir, readManifest } = require("./lib/paths");
 const { parseWords, buildCaptions } = require("./lib/vtt");
 const { createDirector, classify: beatOf, SCENE_ICONS } = require("./lib/antidote-director");
 const { createCopywriter } = require("./lib/antidote-copy");
+const { castBook, WORLD_NAMES } = require("./lib/antidote-costume");
 
 const FPS = 30;
 const args = Object.fromEntries(
@@ -49,6 +50,14 @@ const SCENE_SECS = args["scene-secs"] ? parseFloat(args["scene-secs"]) : 6.5;
 //   --callouts=<file>    consume that file after Claude has rewritten the callouts
 const EMIT_BEATS = args["emit-beats"] || null;
 const CALLOUTS_IN = args.callouts || null;
+// ── CASTING (Antidote 3.1) ─────────────────────────────────────────────────
+//   --emit-cast=<file>  dump the auto-cast bible and exit, for Claude to rewrite
+//                       with the book's real characters
+//   --cast=<file>       consume that file as meta.cast
+//   --world=<name>      override the detected wardrobe world
+const EMIT_CAST = args["emit-cast"] || null;
+const CAST_IN = args.cast || null;
+const WORLD = args.world || null;
 // The authored art file (Claude-first). Each beat may carry a `callout` and/or a
 // `concept` (the scene's literal subject → its icon). Kept raw as ART so the
 // concept survives; CALLOUTS is the callout-only view the copy path consumes.
@@ -118,36 +127,33 @@ const BGS = [
 ];
 // ── CAST BIBLE ──────────────────────────────────────────────────────────────
 // The old planner did `CAST[(i + c) % CAST.length]`, minting a fresh stranger
-// every scene: 224 character instances, 224 identities, zero continuity. Scenes
-// now carry a ROLE and the look is resolved once, here, from the book palette —
-// so the same protagonist walks through the whole film and restyling the cast is
-// a single edit to meta.cast. Claude can rename and restyle these at
-// art-direction; the engine only cares about the role keys.
+// every scene: 224 character instances, 224 identities, zero continuity. Then it
+// shipped ONE hardcoded bible instead, which fixed continuity and created a new
+// problem: the same five actors, in the same three coats, in every book on the
+// channel.
+//
+// Casting now happens per book (scripts/lib/antidote-costume.js): the narration
+// picks a wardrobe WORLD (present day, 1920s, 19th century, war, farm, regime,
+// university, corporate, pre-modern), and five visibly different people are
+// drawn from that world's pools — different garments, headwear, builds and
+// head-to-body ratios, deterministic from the slug. Claude then replaces them
+// with the book's actual characters via --emit-cast / --cast.
 const SEED = SLUG.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-// Lead presentation varies per book so the channel doesn't look like one series.
-const LEAD_F = SEED % 2 === 1;
-const CAST_BIBLE = {
-  narrator: {
-    name: "Narrator — talks to camera, frames every idea",
-    variant: { skin: "#F2C79B", hair: "#3A2A22", suit: PAL.red, shirt: "#FFFFFF", hairStyle: "short", gender: "m", age: "adult", outfit: "casual", glasses: false, beard: "none", expression: "neutral" },
-  },
-  protagonist: {
-    name: "The 'you' of the book — carries every lived beat",
-    variant: { skin: "#E7B489", hair: "#2B2622", suit: darken(PAL.gold, 0.18), shirt: lighten(PAL.paper, 0.34), hairStyle: LEAD_F ? "long" : "short", gender: LEAD_F ? "f" : "m", age: "adult", outfit: "casual", glasses: false, beard: "none", expression: "neutral" },
-  },
-  foil: {
-    name: "Whoever the protagonist is up against",
-    variant: { skin: "#C98A5E", hair: "#241C16", suit: darken(PAL.ink, 0), shirt: lighten(PAL.paper, 0.3), hairStyle: LEAD_F ? "buzz" : "bun", gender: LEAD_F ? "m" : "f", age: "adult", outfit: "suit", glasses: false, beard: LEAD_F ? "stubble" : "none", expression: "neutral" },
-  },
-  mentor: {
-    name: "Shows up on advice beats — older, calmer",
-    variant: { skin: "#F0C9A0", hair: "#9A9A9A", suit: darken(PAL.red, 0.3), shirt: "#FFFFFF", hairStyle: "bald", gender: "m", age: "old", outfit: "suit", glasses: true, beard: "full", expression: "neutral" },
-  },
-  extra: {
-    name: "Anonymous body — crowds, background roles",
-    variant: { skin: "#DDA97C", hair: "#3B302A", suit: lighten(PAL.ink, 0.42), shirt: lighten(PAL.paper, 0.2), hairStyle: "buzz", gender: "m", age: "young", outfit: "uniform", glasses: false, beard: "none", expression: "neutral" },
-  },
-};
+
+/**
+ * A scene names a ROLE; the cast may be keyed by character NAME. This maps one
+ * to the other, so `role: "protagonist"` resolves to `cast.patch` when Claude
+ * has cast Patch as the protagonist. Falls back to the role key itself, which
+ * is what every pre-3.1 config uses.
+ */
+function roleIndex(cast) {
+  const byRole = {};
+  for (const [key, member] of Object.entries(cast || {})) {
+    const r = (member && member.role) || key;
+    if (!byRole[r]) byRole[r] = key;
+  }
+  return (role) => byRole[role] || (cast && cast[role] ? role : byRole.narrator || Object.keys(cast || {})[0] || role);
+}
 
 (() => {
   const vttText = fs.readFileSync(abs.vtt ? (fs.existsSync(VTT) ? VTT : abs.vtt(SLUG)) : VTT, "utf8");
@@ -169,14 +175,123 @@ const CAST_BIBLE = {
     scenes.push({ from, end, text, words: cur.flatMap((c) => c.words || []) });
     cur = [];
   };
-  for (const c of captions) {
+  // ── CUTS LAND IN THE BREATH, NOT ON THE CLOCK ───────────────────────────
+  // Scenes used to break on "long enough AND the caption ends in a period",
+  // which puts a cut wherever the transcript happens to punctuate — often mid
+  // breath, sometimes a second after the speaker already stopped.
+  //
+  // Finding the real pauses takes one extra step, because an ASR VTT has no
+  // silences in it: every word's end time is just the next word's start, so
+  // caption-to-caption gaps are 0 for 866 of 875 captions on a 36-minute book.
+  // The pause is hiding in the SLOT — a two-letter word occupying 20 frames is
+  // a speaker who stopped talking. So compare each word's slot against the time
+  // that word could plausibly take to say; the surplus IS the breath.
+  //
+  // This is the edit trick a hand-animated channel cannot afford to do
+  // frame-accurately across thirty minutes, and it costs us nothing.
+  const GAP_BREATH = 7; // ~0.23s of surplus — a real pause between phrases (~p70)
+  const GAP_STRONG = 13; // ~0.43s — an unmistakable beat of silence (~p88)
+  const sayFrames = (w) => Math.min(20, 3 + 1.3 * String(w).replace(/[^A-Za-z0-9']/g, "").length);
+  const breathAfter = (k) => {
+    const ws = captions[k].words;
+    const next = captions[k + 1];
+    if (!ws || !ws.length || !next) return Infinity; // end of the film: always a break
+    const nw = next.words && next.words[0];
+    if (!nw) return Infinity;
+    const last = ws[ws.length - 1];
+    return Math.max(0, nw.s - last.s - sayFrames(last.w));
+  };
+  for (let k = 0; k < captions.length; k++) {
+    const c = captions[k];
     cur.push(c);
     const dur = (c.endFrame - cur[0].startFrame) / FPS;
     const endsSentence = /[.!?]$/.test(c.text);
-    if (dur >= SCENE_SECS && endsSentence) flush();
+    const breath = breathAfter(k);
+    if (dur >= SCENE_SECS && (endsSentence || breath >= GAP_BREATH)) flush();
+    // a long silence is worth cutting on slightly early — it is a better edit
+    // point than a sentence end half a scene later
+    else if (dur >= SCENE_SECS * 0.72 && breath >= GAP_STRONG) flush();
+    // past the target and drifting: take ANY audible seam rather than riding to
+    // the hard cap, which is what pushed the average scene to 9.8s against a
+    // 6.5s target and stretched the dead windows with it
+    else if (dur >= SCENE_SECS * 1.25 && breath >= 4) flush();
     else if (dur >= SCENE_SECS * 1.6) flush();
   }
   flush();
+
+  // ── CASTING ─────────────────────────────────────────────────────────────
+  // The world is read from the narration itself, so a 1920s novel gets fedoras
+  // and a regime dystopia gets hoods without anyone saying so. A --cast file
+  // (Claude, after reading the book) always wins.
+  const sample = captions.slice(0, 220).map((c) => c.text).join(" ");
+  const auto = castBook({ slug: SLUG, palette: PAL, genre: GENRE, title: TITLE, sample, world: WORLD });
+  let CAST_BIBLE = auto.cast;
+  let CAST_WORLD = auto.world;
+  if (CAST_IN) {
+    const loaded = JSON.parse(fs.readFileSync(CAST_IN, "utf8"));
+    const authored = loaded && loaded.cast ? loaded.cast : loaded;
+    if (authored && typeof authored === "object" && Object.keys(authored).length) {
+      // Merge over the auto-cast per member, so Claude can set three fields on a
+      // character and inherit a complete, coherent variant for the rest.
+      CAST_BIBLE = {};
+      for (const [key, member] of Object.entries(authored)) {
+        const fallback = auto.cast[member && member.role ? member.role : key] || auto.cast.narrator;
+        const merged = { ...fallback.variant, ...((member && member.variant) || {}) };
+        // A recolored character must not keep the auto-cast's derived trim, or
+        // Claude sets a cream suit and the hat stays the old character's black.
+        if (member && member.variant && member.variant.suit && !member.variant.trim) delete merged.trim;
+        CAST_BIBLE[key] = {
+          name: (member && member.name) || key,
+          ...(member && member.role ? { role: member.role } : {}),
+          variant: merged,
+        };
+      }
+      if (loaded && loaded.world) CAST_WORLD = loaded.world;
+    }
+  }
+  const castKeyFor = roleIndex(CAST_BIBLE);
+
+  // ── Claude handoff: dump the cast and stop ──────────────────────────────
+  if (EMIT_CAST) {
+    const payload = {
+      book: { slug: SLUG, title: TITLE, author: AUTHOR, genre: GENRE },
+      world: CAST_WORLD,
+      worlds: WORLD_NAMES,
+      instructions: [
+        "Recast this book with ITS OWN characters. Rename the keys to the people the",
+        "  narration is actually about (`patch`, `saint`, `grace`) and give each a `role`",
+        "  from narrator|protagonist|foil|mentor|extra so the director can still cast a beat.",
+        "Keep `narrator` for non-fiction — there the five generic roles are the right cast.",
+        "Silhouette carries a character further than color does. Set `outfit`, `headwear`,",
+        "  `build`, `height` and `headScale` before you touch a hex value: at the size a wide",
+        "  shot renders, a hat reads and a shirt color does not.",
+        "A child is `height` ~0.74 with `headScale` ~1.2 — not a small adult.",
+        "Only fields you set are overridden; the rest are inherited from the auto-cast, so",
+        "  three well-chosen fields beat a fully retyped variant.",
+        "`overlay` takes raw SVG paths in rig units (400 wide, head at 200,150, shoulders",
+        "  y=322, hips y=596) for a SIGNATURE feature a wardrobe combination can't reach —",
+        "  an eyepatch, a chest plate, a scar. Use it for one or two characters at most.",
+        "Then re-run plan-antidote with --cast=<this file>.",
+      ],
+      vocabulary: {
+        outfit: ["suit", "casual", "uniform", "robe", "coat", "dress", "apron", "armor", "overalls", "vest", "cloak", "hoodie", "rags"],
+        headwear: ["none", "cap", "fedora", "beanie", "hood", "headscarf", "bonnet", "crown", "helmet", "topHat", "beret", "veil", "cowboy"],
+        hairStyle: ["short", "buzz", "bald", "long", "bun", "afro", "curly", "ponytail", "braids", "pigtails", "messy", "receding"],
+        beard: ["none", "stubble", "full", "mustache", "goatee", "muttonchops"],
+        accessory: ["none", "tie", "bowtie", "scarf", "necklace", "badge", "satchel", "suspenders", "collar"],
+        build: ["slight", "average", "heavy"],
+        age: ["child", "young", "adult", "old"],
+        height: "0.72 (child) - 1.12 (very tall)",
+        headScale: "0.9 (adult, severe) - 1.2 (child)",
+      },
+      cast: CAST_BIBLE,
+    };
+    fs.writeFileSync(EMIT_CAST, JSON.stringify(payload, null, 2) + "\n");
+    console.log(`✓ ${EMIT_CAST} — dünya: ${CAST_WORLD} (${auto.label}), ${Object.keys(CAST_BIBLE).length} karakter`);
+    console.log(`  Claude kadroyu kitaba göre yeniden yazdıktan sonra:`);
+    console.log(`  node scripts/plan-antidote.js --cast=${EMIT_CAST} --vtt=${VTT} --slug=${SLUG} --title="${TITLE}" --genre=${GENRE}`);
+    return;
+  }
 
   // crude sentiment → drives the character's action + expression so the everyman
   // reacts to the narration instead of idling through 180 scenes identically.
@@ -246,22 +361,33 @@ const CAST_BIBLE = {
     // forces that icon, null forces none); otherwise the director's lexicon reads
     // the subject from the narration.
     const d = director.direct({
-      text: s.text, index: i, isTitle, calloutAt, total: scenes.length,
+      text: s.text, index: i, isTitle, calloutAt, total: scenes.length, durationFrames,
       concept: hasOwn(ART && ART[i], "concept") ? ART[i].concept : undefined,
     });
 
     // ── cast: roles, not looks. meta.cast resolves the face at render time ───
     const characters = [];
+    // BUSINESS — what the lead does with their body this beat (hold an object,
+    // walk across the set, sit down). The director rations these; when one
+    // fires it overrides the sentiment-derived action, because a person holding
+    // a letter should not also be celebrating.
+    const business = d.cast.business || null;
+    // A sustained beat is the SAME take: nobody re-enters and no pose replays.
+    const continued = !!d.cast.continued;
     for (let c = 0; c < d.cast.count; c++) {
-      const role = d.cast.roles[c] || "extra";
+      const role = castKeyFor(d.cast.roles[c] || "extra");
       const isSecond = c > 0;
+      const lead = c === 0 && !isTitle && business;
       characters.push({
         id: `c${i}-${c}`,
         rig: "everyman",
         role,
         expression: isTitle ? "happy" : isSecond ? (r.expression === "happy" ? "worried" : "neutral") : r.expression,
-        enter: d.shot === "twoShot" || d.shot === "split" ? (c === 0 ? "left" : "right") : i % 2 === 0 ? "left" : "fade",
-        action: isTitle ? "talk" : isSecond ? (r.action === "celebrate" ? "slump" : "idle") : r.action,
+        enter: continued ? "none" : d.shot === "twoShot" || d.shot === "split" ? (c === 0 ? "left" : "right") : i % 2 === 0 ? "left" : "fade",
+        ...(continued ? { poseAt: 60 } : {}),
+        action: lead ? business.action : isTitle ? "talk" : isSecond ? (r.action === "celebrate" ? "slump" : "idle") : r.action,
+        ...(lead && business.holds ? { holds: business.holds } : {}),
+        ...(lead && business.travel ? { travel: business.travel } : {}),
         ...(d.cast.crowd && c === 0 ? { crowd: d.cast.crowd } : {}),
       });
     }
@@ -273,6 +399,7 @@ const CAST_BIBLE = {
       _narration: s.text.slice(0, 160), // hint for Claude's art-direction; safe to delete
       _beat: d.class, // which beat class the director read; safe to delete
       _act: d.act, // where the color script places this beat; safe to delete
+      ...(d.sustain ? { _take: "sustained" } : {}), // continues the previous shot; safe to delete
       ...(d.concept ? { concept: d.concept } : {}), // the beat's literal subject (icon)
       shot: d.shot,
       transition: d.transition,
@@ -310,7 +437,14 @@ const CAST_BIBLE = {
         `  Allowed: ${SCENE_ICONS.join(", ")}. Set a string when the beat is really ABOUT that thing`,
         "  (a crash, a home, a lake, a wall of notes); set null to force talking heads; omit to let the",
         "  lexicon decide. Use sparingly and only when it's the true subject — a wrong icon is worse than none.",
+        "The director stages the body itself from the concept — a beat whose subject is a",
+        "  letter/phone/key/photo/book/coin/mirror/mask/idea/compass/meal/love/job/court puts that",
+        "  object IN THE LEAD'S HAND, an outdoor beat can make them walk across the set, an indoor",
+        "  one can sit them down. You do not author that here; naming the right `concept` is what",
+        "  turns it on. A wrong concept costs more now than it used to.",
         "Keep the array order and length. Then re-run plan-antidote with --callouts=<this file>.",
+        "After re-running: node scripts/audit-antidote.js --slug=<slug> — it FAILS the plan if any",
+        "  window runs longer than 8s with nothing happening on screen.",
       ],
       beats: sceneSpecs.map((sc, i) => ({
         i,
@@ -339,7 +473,7 @@ const CAST_BIBLE = {
   let thumbnail = {
     hook: emphasisWords(TITLE, 2).join(" ") || TITLE.toUpperCase(),
     _needsClaudeRefine: true, // replace hook with an original ≤4-word book-specific line
-    variant: { ...CAST_BIBLE.narrator.variant, expression: "happy", outfit: "casual" },
+    variant: { ...(CAST_BIBLE.narrator || Object.values(CAST_BIBLE)[0]).variant, expression: "happy" },
     action: "celebrate",
     expression: "happy",
     motif: "risingBars",
@@ -382,11 +516,16 @@ const CAST_BIBLE = {
 
   console.log(`✓ ${rel.antidoteConfig(SLUG)} — ${sceneSpecs.length} scene(s), ${captions.length} captions, ${(durationInFrames / FPS).toFixed(0)}s`);
   console.log(`✓ ${rel.manifest(SLUG)} — engine: antidote`);
+  console.log(`✓ kadro: ${Object.keys(CAST_BIBLE).length} karakter, gardırop dünyası "${CAST_WORLD}"${CAST_IN ? " (Claude tarafından yazıldı)" : " (otomatik — --emit-cast ile kitaba özelleştir)"}`);
   console.log(`\n⚠  SCAFFOLD — CLAUDE ŞİMDİ ART-DIRECT ETMELİ (Claude-first, en kaliteli yol):`);
   console.log(`   Yönetmen kadraj/geçiş/dekor/motif'i zaten kurdu ("shot", "transition", "bg", "props").`);
   console.log(`   Claude'un işi: "_narration" + "_beat" ipuçlarına göre kinetik metni kitaba özgü YENİDEN YAZMAK,`);
   console.log(`   yanlış okunmuş beat'lerde "shot"u değiştirmek ve motif'i anlatıya oturtmak.`);
   console.log(`   Staging (x/y/size) bilerek boş — shot preset'i yerleştiriyor; sadece override gerekirse yaz.`);
+  console.log(`   KADRO: kitabın gerçek karakterleriyle yeniden dök —`);
+  console.log(`     node scripts/plan-antidote.js --emit-cast=/tmp/${SLUG}.cast.json --vtt=${VTT} --slug=${SLUG} --title="${TITLE}" --genre=${GENRE}`);
+  console.log(`     (Claude isimleri + kostümleri yazar) → aynı komutu --cast=/tmp/${SLUG}.cast.json ile tekrar çalıştır.`);
+  console.log(`   DENETİM: node scripts/audit-antidote.js --slug=${SLUG}  (8sn'den uzun ölü pencere varsa düşer)`);
   console.log(`   Sonra: node scripts/gen-books-registry.js`);
   console.log(`   Önizle: http://localhost:3001/Antidote-${SLUG}`);
 })();

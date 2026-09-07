@@ -120,6 +120,13 @@ if (ENGINE === "antidote") {
   } else if (!fs.existsSync(path.join(ROOT, ACFG))) {
     console.error(`❌ --skip-plan ama ${ACFG} yok.`); process.exit(1);
   }
+  // VISUAL EVENT BUDGET — the plan is measured, not eyeballed. A generated film
+  // has no one watching the cut, so "nothing has happened for twelve seconds"
+  // is invisible until the render is done and 35 minutes long. Advisory here
+  // (optional: true) so it reports without stopping an unattended run; the
+  // numbers go in the log and Claude art-directs against them.
+  step(1.5, "Görsel olay denetimi (dead-air bütçesi)",
+    `node scripts/audit-antidote.js --slug=${SLUG} --soft`, { optional: true });
   // Mastering is NOT Vox-specific: raw NotebookLM audio sits ~-25 LUFS and
   // YouTube never boosts quiet uploads, so an un-mastered Antidote book plays
   // ~11 dB below every other video too. Runs AFTER the plan so --update-config

@@ -112,8 +112,46 @@ export type Pose = {
   headY: number; // head bob px
   blink: number; // 0 open → 1 shut (quick close-open every ~3s)
   gazeX: number; // -1 far left → 0 center → +1 far right (pupil offset)
+  // ── lower body (Antidote 3.0) — only read by the `full` rig, so every pose
+  //    literal written for the waist-up rig still type-checks. ──────────────
+  elbowL?: number; // left forearm rotate deg, relative to the upper arm
+  elbowR?: number; // right forearm rotate deg (+ swings the hand toward center)
+  legL?: number; // left thigh rotate deg, + swings toward screen-left
+  legR?: number; // right thigh rotate deg, + swings toward screen-right
+  kneeL?: number; // left shin rotate deg relative to the thigh (+ = heel back)
+  kneeR?: number;
+  hipY?: number; // whole-body vertical offset px (walk bounce, sitting drop)
+  sit?: number; // 0 standing → 1 seated (thighs forward, shins down)
 };
-const BASE: Pose = { lean: 0, armL: 8, armR: -8, mouth: 0, browY: 0, headY: 0, blink: 0, gazeX: 0 };
+const BASE: Pose = { lean: 0, armL: 8, armR: -8, mouth: 0, browY: 0, headY: 0, blink: 0, gazeX: 0, elbowL: 0, elbowR: 0, legL: 0, legR: 0, kneeL: 0, kneeR: 0, hipY: 0, sit: 0 };
+
+/**
+ * gait — a front-facing walk cycle.
+ *
+ * The rig faces the viewer, so a walk cannot be read from a side-on leg swing;
+ * it reads from the legs SCISSORING in the picture plane, counter-swinging arms
+ * and a two-per-cycle body bounce. Combined with `travel` (the character
+ * actually crossing the stage) that is enough to sell walking in flat vector —
+ * which is how the reference channel does it too.
+ *
+ * `speed` is cycles per second; 1.15 is an unhurried walk at 30fps.
+ */
+export function gait(frame: number, fps: number, speed = 1.15) {
+  const ph = (frame / fps) * speed * Math.PI * 2;
+  const swing = Math.sin(ph);
+  const lift = (x: number) => Math.max(0, x); // knee only bends on the recovery half
+  return {
+    legL: swing * 21,
+    legR: -swing * 21,
+    kneeL: lift(-swing) * 30,
+    kneeR: lift(swing) * 30,
+    armL: 8 - swing * 17,
+    armR: -8 - swing * 17,
+    // bounce peaks twice per cycle, at each mid-stride
+    hipY: -Math.abs(Math.sin(ph)) * 6,
+    lean: swing * 1.4,
+  };
+}
 
 /**
  * Deterministic blink cycle — a quick shut (4 frames) every ~97 frames (~3.2s
@@ -145,7 +183,10 @@ export function pose(action: CharAction, frame: number, fps: number): Pose {
       const m = (Math.sin(frame * 0.8) * 0.5 + 0.5) * (Math.sin(frame * 0.37) * 0.4 + 0.6);
       // talkers look slightly off-center, drifting naturally
       const gazeX = Math.sin(frame * 0.03) * 0.35;
-      return { ...BASE, mouth: m, headY: Math.sin(frame * 0.2) * 2, blink, gazeX };
+      // hands gesture while talking — rigid arms are what made every presenter
+      // beat read as a cardboard cut-out with a flapping mouth
+      const g = Math.sin(frame * 0.11);
+      return { ...BASE, mouth: m, headY: Math.sin(frame * 0.2) * 2, blink, gazeX, armR: -12 + g * 5, elbowR: 26 + g * 16, elbowL: -14 - g * 9 };
     }
     case "point": {
       const p = spring({ frame, fps, config: { damping: 10, stiffness: 160 } });
@@ -168,11 +209,68 @@ export function pose(action: CharAction, frame: number, fps: number): Pose {
       const gazeX = -0.3 + Math.sin(frame * 0.02) * 0.2;
       return { ...BASE, armR: -70, lean: 3, headY: Math.sin(frame * 0.05) * 2, blink, gazeX };
     }
+    case "walk": {
+      const g = gait(frame, fps);
+      return { ...BASE, ...g, mouth: 0, headY: g.hipY * 0.35, blink, gazeX: Math.sin(frame * 0.02) * 0.2 };
+    }
+    case "sit": {
+      // settle into the chair rather than snapping into it
+      const d = spring({ frame, fps, config: { damping: 15, stiffness: 110 } });
+      return {
+        ...BASE,
+        sit: d,
+        // Seat height. Standing hip 596 / floor 876; a chair seat sits ~127
+        // above the floor, and this drop is what puts the hips ON it. Tuned
+        // together with the thigh foreshortening in Everyman so the feet still
+        // land on the same floor line as when standing.
+        hipY: d * 109,
+        lean: interpolate(d, [0, 1], [0, 4]),
+        armL: 26, armR: -26,
+        headY: bob(frame, 2, 130),
+        blink,
+        gazeX: Math.sin(frame * 0.018) * 0.2,
+      };
+    }
+    case "hold": {
+      // forearm comes up in front so whatever `holds` names is presented, not
+      // dangled at the hip. The hand position is what handprops anchors to.
+      const p = spring({ frame, fps, config: { damping: 13, stiffness: 130 } });
+      return {
+        ...BASE,
+        // upper arm stays down, the FOREARM comes across the body: the hand
+        // lands in front of the chest (~x 228, y 431 in rig units) instead of
+        // swinging out to arm's length, which is where a rigid arm put it.
+        armR: interpolate(p, [0, 1], [-8, -6]),
+        elbowR: interpolate(p, [0, 1], [0, 82]),
+        armL: 12,
+        lean: interpolate(p, [0, 1], [0, -2]),
+        headY: bob(frame, 2, 140),
+        blink,
+        gazeX: 0.3,
+      };
+    }
+    case "reach": {
+      // the figure extends toward its subject — the beat's motif, usually
+      const p = spring({ frame, fps, config: { damping: 11, stiffness: 120 } });
+      return {
+        ...BASE,
+        armR: interpolate(p, [0, 1], [-8, -118]),
+        elbowR: interpolate(p, [0, 1], [0, -12]),
+        lean: interpolate(p, [0, 1], [0, 9]),
+        legL: interpolate(p, [0, 1], [0, -7]),
+        legR: interpolate(p, [0, 1], [0, 9]),
+        headY: 2,
+        blink,
+        gazeX: 0.75,
+      };
+    }
     case "idle":
     default: {
       // idle: slow gentle drift, eyes wander
       const gazeX = Math.sin(frame * 0.015) * 0.25;
-      return { ...BASE, headY: bob(frame, 3, 120), lean: Math.sin(frame * 0.02) * 1.2, blink, gazeX };
+      // a standing figure shifts its weight; perfectly symmetrical legs read as a mannequin
+      const shift = Math.sin(frame * 0.012);
+      return { ...BASE, headY: bob(frame, 3, 120), lean: Math.sin(frame * 0.02) * 1.2, blink, gazeX, legL: shift * 2.2, legR: shift * 1.1, hipY: Math.abs(shift) * 1.4 };
     }
   }
 }

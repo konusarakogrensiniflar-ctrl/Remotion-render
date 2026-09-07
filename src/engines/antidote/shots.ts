@@ -1,4 +1,4 @@
-import type { CharacterSpec, ShotName, TextSpec } from "./schema";
+import type { BodyPlan, CharacterSpec, ShotName, TextSpec } from "./schema";
 
 /**
  * shots.ts — the SHOT GRAMMAR of the Antidote engine.
@@ -18,6 +18,20 @@ export type ShotPreset = {
   stage: { scale: number; x: number; y: number };
   /** Slots the cast fills, in order. Extra characters reuse the last slot, nudged. */
   chars: CharStage[];
+  /**
+   * FULL-BODY slots (Antidote 3.0). A shot that claims to show a person inside a
+   * world — wide, crowd, diorama, illustration, lowAngle, silhouette — draws the
+   * `full` rig (hips + legs + feet) instead of a torso hovering over the set.
+   *
+   * These are a SEPARATE slot table on purpose. The full rig's box is 900 tall
+   * against the bust's 600, so its anchor and scale are different numbers; by
+   * keeping the bust table byte-identical, every config written before 3.0 —
+   * and every character that carries explicit staging — frames exactly as it
+   * did before. See resolveBody().
+   */
+  charsFull?: CharStage[];
+  /** Crowd rows are re-spaced for the taller rig. */
+  fullCrowd?: boolean;
   /** Copy zone; stacked entries step down by `textStep`. */
   text: TextStage;
   textStep: number;
@@ -36,6 +50,10 @@ export const SHOTS: Record<ShotName, ShotPreset> = {
   wide: {
     stage: { scale: 1, x: 0, y: 0 },
     chars: [C(700, 742, 0.95), C(1268, 742, 0.95, true)],
+    // full: both figures stand on the ground plane, feet at ~y 925 — clear of the
+    // reserved caption band (CaptionLayer sits at bottom:64) and on the floor
+    // line the `near` backdrop layer draws
+    charsFull: [C(700, 644, 0.66), C(1268, 644, 0.66, true)],
     text: { x: 960, y: 196, size: 92 },
     textStep: 132,
     motif: { x: 1420, y: 560, scale: 0.9 },
@@ -94,6 +112,9 @@ export const SHOTS: Record<ShotName, ShotPreset> = {
   silhouette: {
     stage: { scale: 1, x: 0, y: 0 },
     chars: [C(960, 726, 1.9, false, true), C(1360, 726, 1.7, true, true)],
+    // a whole body against the accent field reads as a person; a floating torso
+    // reads as a logo
+    charsFull: [C(960, 628, 0.71, false, true), C(1330, 640, 0.64, true, true)],
     text: { x: 960, y: 244, size: 128 },
     textStep: 158,
     motif: { x: 300, y: 560, scale: 0.8 },
@@ -102,6 +123,8 @@ export const SHOTS: Record<ShotName, ShotPreset> = {
   lowAngle: {
     stage: { scale: 1, x: 0, y: 0 },
     chars: [C(960, 986, 2.15), C(1300, 986, 1.9, true)],
+    // heroic: tall figure, feet just past the bottom edge
+    charsFull: [C(960, 720, 0.87), C(1320, 720, 0.80, true)],
     text: { x: 960, y: 238, size: 140 },
     textStep: 162,
     motif: { x: 300, y: 400, scale: 0.7 },
@@ -110,6 +133,8 @@ export const SHOTS: Record<ShotName, ShotPreset> = {
   crowd: {
     stage: { scale: 1, x: 0, y: 0 },
     chars: [C(960, 760, 1.05)],
+    charsFull: [C(960, 627, 0.62)],
+    fullCrowd: true,
     text: { x: 960, y: 182, size: 96 },
     textStep: 128,
     // off to the side: a centered motif lands straight on the crowd's heads
@@ -121,6 +146,8 @@ export const SHOTS: Record<ShotName, ShotPreset> = {
   illustration: {
     stage: { scale: 1, x: 0, y: 0 },
     chars: [C(356, 984, 2.02, false, true)],
+    // a whole person looking at the thing, not a cropped shoulder
+    charsFull: [C(330, 640, 0.67, false, true)],
     text: { x: 566, y: 232, size: 90 },
     textStep: 126,
     motif: { x: 1262, y: 446, scale: 1.66 },
@@ -130,6 +157,8 @@ export const SHOTS: Record<ShotName, ShotPreset> = {
   diorama: {
     stage: { scale: 1, x: 0, y: 0 },
     chars: [C(560, 988, 1.78, false, true)],
+    // standing INSIDE the set, on its ground plane
+    charsFull: [C(520, 631, 0.69, false, true)],
     text: { x: 520, y: 196, size: 90 },
     textStep: 126,
     motif: { x: 1150, y: 590, scale: 2.5 },
@@ -163,10 +192,31 @@ export const SHOTS: Record<ShotName, ShotPreset> = {
  */
 export const shotPreset = (shot: ShotName | undefined): ShotPreset => SHOTS[shot as ShotName] ?? SHOTS.medium;
 
+/**
+ * Which body plan this character renders as.
+ *
+ * Rules, in order:
+ *  1. An explicit `body` on the character always wins (hand art-direction).
+ *  2. A character carrying EXPLICIT STAGING (x / y / scale) is legacy
+ *     hand-staging: those numbers were chosen against the 600-tall bust box, so
+ *     growing the rig to 900 would silently re-frame a book somebody tuned by
+ *     hand. Those stay `bust`, exactly as they render today.
+ *  3. Otherwise the shot decides — and a shot decides "full" by having a
+ *     `charsFull` slot table.
+ */
+export function resolveBody(shot: ShotName, spec: CharacterSpec): BodyPlan {
+  if (spec.body) return spec.body;
+  const staged = spec.x !== undefined || spec.y !== undefined || spec.scale !== undefined;
+  if (staged) return "bust";
+  return shotPreset(shot).charsFull ? "full" : "bust";
+}
+
 /** Resolve a character's staging: explicit values win, otherwise the shot slot. */
 export function stageChar(shot: ShotName, spec: CharacterSpec, index: number): CharStage {
   const preset = shotPreset(shot);
-  const slots = preset.chars;
+  // Full-body characters stand on the full-body slot table; everything else
+  // keeps the original one, byte for byte.
+  const slots = resolveBody(shot, spec) === "full" && preset.charsFull ? preset.charsFull : preset.chars;
   const slot = slots.length ? slots[Math.min(index, slots.length - 1)] : SHOTS.medium.chars[0];
   // Characters beyond the last slot fan out so they never stack exactly.
   const overflow = slots.length ? Math.max(0, index - (slots.length - 1)) : 0;

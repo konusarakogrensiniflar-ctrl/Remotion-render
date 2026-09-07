@@ -369,6 +369,131 @@ Content-dependent archetypes are never chosen this way.
   name the idea; the arc *shows* it. Assigned by the director from the beat class; motifs that
   already animate a quantity are excluded. Defaults to `"none"`, so old configs are unchanged.
 
+### 9.3e Antidote 3.0 — bodies, places, takes, and the event budget
+
+Four changes, all aimed at the gap between "a very well-cut slide deck" and animation.
+
+**1. The rig has legs.** `Everyman` now renders two body plans: `bust` (viewBox 400×600, the
+original waist-up rig) and `full` (400×900 — hips, thighs, shins, feet). A shot opts in by
+carrying a `charsFull` slot table in `shots.ts`: `wide` · `crowd` · `diorama` · `illustration`
+· `lowAngle` · `silhouette`. Those are exactly the shots that *claim* to show a person inside a
+world, and a torso hovering over a street was the clearest template tell the engine had.
+The arms also gained an **elbow**, so a hand can come across the body instead of only swinging
+out to arm's length.
+
+*Compatibility rule (`resolveBody`)*: an explicit `body` wins; otherwise a character carrying
+**any explicit staging** (`x`/`y`/`scale`) stays `bust`, because those numbers were tuned
+against the 600-tall box. Hand-directed books re-render byte-identically; only auto-staged
+characters grow legs.
+
+**2. Bodies do things.** New actions `walk` · `sit` · `hold` · `reach`, plus two character
+fields: `holds` (a glyph from `handprops.tsx` anchored in the right hand, carried by the arm's
+rotation and counter-rotated so the object stays upright) and `travel: [fromDx, toDx]` (the
+figure actually crosses the set — a gait cycle without travel is a treadmill). The director
+rations these: a hold needs a concept that maps to a holdable object and a 5-beat cooldown, a
+walk needs a full-body shot in an outdoor set and 7 beats, a sit needs furniture and 9.
+
+**3. The backdrop became a location.** Ten real sets — `kitchen` `bedroom` `classroom`
+`library` `cafe` `hospital` `court` `forest` `shore` `highway` — join the seven abstract
+fields, and `CONCEPT_SET` in the director maps the beat's own subject to one. A location still
+*holds* (a set that changes every beat is strobing, not geography): the concept only overrides
+the genre rotation when we haven't just moved, and it decays back after 8 beats.
+
+**4. Shots sustain.** `SUSTAINABLE` shots can be carried across up to 3 beats: same shot, same
+set, same cast, `cut/0` transition, and the camera **continues** its previous move instead of
+restarting it. A sustained beat must carry its own callout — sustaining a silent beat is not a
+continuous take, it is dead air (the audit caught 30-second windows of exactly that).
+
+**Cuts land in the breath.** An ASR VTT has no silences in it: every word's end time is just
+the next word's start, so caption-to-caption gaps were 0 for 866 of 875 captions on a 36-minute
+book. The pause hides in the *slot* — a two-letter word occupying 20 frames is a speaker who
+stopped. `plan-antidote.js` compares each word's slot against the time that word could
+plausibly take to say; the surplus is the breath, and cuts snap to it.
+
+**`scripts/audit-antidote.js` — the visual-event budget.** A hand-animated channel is
+disciplined by a person watching the cut; a generated film has no such reflex, and the failure
+is invisible in the config. The audit walks the timeline counting every frame the picture
+changes (cut, callout, motif, punch, chapter card), and **fails a plan when any window runs
+longer than `--max-gap` (default 8 s)**. It also reports presenter-shot share, full-body share,
+sustained takes, held props, distinct locations and the longest same-shot run, so a regression
+is a number rather than a vibe.
+
+```bash
+node scripts/audit-antidote.js --slug=<slug>     # one book, exit 1 over budget
+node scripts/audit-antidote.js --all --soft      # the whole catalog, never fails
+```
+
+Measured on a 36-minute plan while building this: **31 s worst dead window → 13 s**, 378 →
+792 events (10 → 22 per minute), 157 → 20 windows over budget, silent scenes 0. The remaining
+levers were the event floor (a beat with no callout always gets its motif; a beat ≥ 6.5 s with
+no callout gets a mid-beat camera push; a beat ≥ 10 s, or front-loaded and ≥ 7.5 s, gets a
+second late motif) — the audit is what found each of them.
+
+Note the audit does **not** count the subtitle band, which is changing constantly. Don't tune
+the budget below ~6 s against a number that ignores the busiest layer on screen.
+
+**Dev reel:** `Antidote-lab` (`src/engines/antidote/lab.ts`) renders the 3.0 capabilities
+through the ordinary `AntidoteBook` path — full-body wide, a walk, a sit, two holds, a crowd, a
+courtroom diorama and a full silhouette. `Antidote-cast-sheet` still shows what the rig can
+look like; this shows what the engine can do.
+
+### 9.3f Antidote 3.1 — the Character Foundry
+
+The reference channel draws a new cast for every book. We had the opposite: one rig, five
+hardcoded roles, four outfits, recolored per palette — so a viewer who watched two of our
+videos saw **the same five actors in the same three coats**. That is a templated-content
+signal no amount of shot variety fixes.
+
+What actually makes a character read as belonging to a particular book is **silhouette**, and
+silhouette is parametric — which is the one thing a hand-drawn channel cannot recombine for
+free.
+
+**`src/engines/antidote/wardrobe.tsx`** — the parts bin. 13 garments (coat · dress · apron ·
+armor · overalls · vest · cloak · hoodie · rags + the original four), 13 headwear pieces
+(fedora · topHat · bonnet · hood · helmet · crown · cowboy · beret · veil · headscarf · cap ·
+beanie), 12 hair styles, 6 beards, 9 worn accessories. Two colors each, so a character still
+reads at the size a `wide` renders them.
+
+**Proportions** (`variant.height` · `build` · `headScale`). `height` scales the whole figure
+**about the ground**, so a child and an adult in the same shot stand on the same floor line.
+`build` widens the body and never the face. `headScale` grows the head from the neck up — a
+child is `height` 0.74 with `headScale` 1.2, not a shrunken adult, and that ratio is most of
+what reads as "child" in silhouette.
+
+**Named cast.** `meta.cast` was keyed by the five generic roles, which is right for
+non-fiction and wrong for a novel. Keys are now free strings — `cast.patch`, `cast.saint` —
+each carrying a `role` so the director can still cast a beat by function. The five role names
+remain valid keys, so every pre-3.1 config resolves unchanged.
+
+**`scripts/lib/antidote-costume.js` — the casting director.** Reads a wardrobe WORLD off the
+narration itself (present day · corporate · university · **1920s** · 19th century ·
+pre-modern/mythic · war · farm · regime) and builds five visibly different people from that
+world's pools — deterministic from the slug, gendered pools so nobody gets a dress and a
+bowtie, and no slot repeats inside a book. Measured across the catalog: Gatsby → `jazzAge`,
+The Handmaid's Tale → `dystopian`, Psychology of Money → `office`, Fences → `rural`, The
+Odyssey → `medieval`, with no hand input.
+
+**Claude-first casting**, mirroring `--emit-beats`:
+
+```bash
+node scripts/plan-antidote.js --emit-cast=cast.json  ...   # auto-cast + the vocabulary
+# Claude renames the keys to the book's real characters and sets their costumes
+node scripts/plan-antidote.js --cast=cast.json       ...   # consumes it
+```
+
+The merge is **per field**: three well-chosen fields on a character inherit a complete,
+coherent variant for the rest. `--world=<name>` forces the wardrobe world.
+
+**The escape hatch.** `variant.overlay` takes raw SVG paths in rig units (400 wide, head at
+200,150, shoulders y=322, hips y=596) for a signature feature no combination reaches — an
+eyepatch, a chest plate, a scar. It is data, so it still travels in the render bundle and
+still costs no per-book code. Use it for one or two characters at most: a wardrobe
+combination that reads beats a hand-authored path that nearly reads.
+
+**Dev reel:** `Antidote-cast-sheet` is now a foundry sheet — fourteen people from nine worlds
+on one shared baseline. Add a wardrobe part, add a cell, and a regression is visible at a
+glance instead of eleven books later.
+
 ### 9.4 Archetypes (`voxkit`)
 
 `title` · `statement` · `list` · `quote` · `stat` · `imagefocus` · `compare` · `punchline`.

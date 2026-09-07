@@ -17,7 +17,16 @@ import { z } from "zod";
 export const enterAnim = z.enum(["fade", "left", "right", "up", "down", "pop", "none"]);
 export type EnterAnim = z.infer<typeof enterAnim>;
 
-export const charAction = z.enum(["idle", "talk", "point", "celebrate", "slump", "think"]);
+export const charAction = z.enum([
+  "idle", "talk", "point", "celebrate", "slump", "think",
+  // ── full-body actions (Antidote 3.0) ──────────────────────────────────────
+  // The rig was waist-up, so a beat about GOING somewhere had to be narrated by
+  // a torso. These need legs: `body: "full"` (the shot usually supplies it).
+  "walk", // gait cycle; pair with `travel` to actually cross the frame
+  "sit", // knees forward, shins down — a chair/desk/bed beat
+  "hold", // forearm raised in front, hand presenting whatever `holds` names
+  "reach", // arm extended toward the motif — the figure touches its subject
+]);
 export type CharAction = z.infer<typeof charAction>;
 
 export const expression = z.enum(["neutral", "happy", "sad", "surprised", "worried"]);
@@ -73,11 +82,78 @@ export const DEFAULT_TRANSITION: TransitionSpec = { type: "cut", frames: 0 };
 // rig yields a whole cast (hair, glasses, beard, presentation, age, outfit).
 // (A raster-cutout rig can be added later without changing scenes — the rig
 // field selects which renderer draws it.)
-export const hairStyle = z.enum(["short", "buzz", "bald", "long", "bun"]);
-export const beardStyle = z.enum(["none", "stubble", "full"]);
+// ── BODY PLAN ───────────────────────────────────────────────────────────────
+// The rig used to be waist-up only (viewBox 400×600). That is correct framing
+// for a close-up and WRONG for every shot that claims to show a person inside a
+// world: a `wide` of a torso floating above a street is the single clearest
+// "this is a template" tell we had. `full` draws hips, legs and feet in a taller
+// box (400×900) so the figure can stand in, walk through and sit inside a set.
+//
+// Compatibility: a character with an EXPLICIT `y` keeps the bust rig unless it
+// asks for `full` by name, so hand-staged legacy books are untouched (see
+// resolveBody in shots.ts).
+export const bodyPlan = z.enum(["bust", "full"]);
+export type BodyPlan = z.infer<typeof bodyPlan>;
+
+// ── HAND PROPS ──────────────────────────────────────────────────────────────
+// The motif library and the rig existed side by side and never touched: a beat
+// about a letter drew a huge letter NEXT TO a person whose hands hung at their
+// sides. A hand prop is a small glyph anchored to the rig's right hand, so the
+// character actually holds the thing the sentence is about.
+export const handProp = z.enum([
+  "book", "phone", "key", "notes", "letter", "coin", "cup", "lightbulb",
+  "mask", "photo", "mirror", "flower", "compass", "briefcase",
+]);
+export type HandProp = z.infer<typeof handProp>;
+
+// ── THE CHARACTER FOUNDRY (Antidote 3.1) ────────────────────────────────────
+// One rig, colored four ways, wearing one of four outfits, meant every book on
+// the channel was cast from the same five people in the same clothes. What makes
+// a character read as belonging to a PARTICULAR book is not draughtsmanship —
+// it is SILHOUETTE: a hat, a period coat, a child's head-to-body ratio, the
+// thing they carry. All of that is parametric, which is our structural
+// advantage: the reference channel redraws a cast per book, we recombine one.
+export const hairStyle = z.enum([
+  "short", "buzz", "bald", "long", "bun",
+  "afro", "curly", "ponytail", "braids", "pigtails", "messy", "receding",
+]);
+export const beardStyle = z.enum(["none", "stubble", "full", "mustache", "goatee", "muttonchops"]);
 export const genderPresentation = z.enum(["m", "f"]);
-export const ageStage = z.enum(["young", "adult", "old"]);
-export const outfitStyle = z.enum(["suit", "casual", "uniform", "robe"]);
+export const ageStage = z.enum(["child", "young", "adult", "old"]);
+export const outfitStyle = z.enum([
+  "suit", "casual", "uniform", "robe",
+  "coat", "dress", "apron", "armor", "overalls", "vest", "cloak", "hoodie", "rags",
+]);
+/** Headwear is the single cheapest silhouette change there is. */
+export const headwearStyle = z.enum([
+  "none", "cap", "fedora", "beanie", "hood", "headscarf", "bonnet",
+  "crown", "helmet", "topHat", "beret", "veil", "cowboy",
+]);
+/** Worn accents that sit over the finished garment. */
+export const accessoryStyle = z.enum([
+  "none", "tie", "bowtie", "scarf", "necklace", "badge", "satchel", "suspenders", "collar",
+]);
+/** Torso mass. A silhouette is as much width as height. */
+export const buildType = z.enum(["slight", "average", "heavy"]);
+
+/**
+ * A bespoke shape drawn onto the rig — the escape hatch for the one or two
+ * SIGNATURE characters a parametric wardrobe can't reach (an eyepatch, a wing,
+ * a chest plate, a birthmark). Authored as data in the book's config, so it
+ * still costs no per-video code and still travels in the render bundle.
+ *
+ * Paths are in the rig's own viewBox units (400 wide; 600 bust / 900 full, with
+ * the head centred on x=200,y=150). Keep this rare: a wardrobe combination that
+ * reads is better than a hand-authored path that nearly reads.
+ */
+export const overlayShape = z.object({
+  d: z.string(),
+  fill: z.string().default("#26241F"),
+  opacity: z.number().default(1),
+  /** behind = under the body (wings, capes); front = over it (scars, patches). */
+  layer: z.enum(["behind", "front"]).default("front"),
+});
+export type OverlayShape = z.infer<typeof overlayShape>;
 
 export const variantSchema = z.object({
   skin: z.string().default("#F2C79B"),
@@ -91,11 +167,27 @@ export const variantSchema = z.object({
   gender: genderPresentation.default("m"),
   age: ageStage.default("adult"),
   outfit: outfitStyle.default("suit"),
+  // ── foundry additions. Every one defaults to the pre-3.1 look, so a config
+  //    written before the foundry renders exactly as it did. ────────────────
+  headwear: headwearStyle.default("none"),
+  accessory: accessoryStyle.default("none"),
+  build: buildType.default("average"),
+  /** Whole-figure scale, 0.72 (a small child) → 1.12 (a very tall adult). */
+  height: z.number().default(1),
+  /** Head size relative to the body. A child is not a shrunken adult: 1.18. */
+  headScale: z.number().default(1),
+  /** Headwear / accessory color; defaults to a shade of the garment. */
+  trim: z.string().optional(),
+  overlay: z.array(overlayShape).default([]),
 });
 export type VariantSpec = z.infer<typeof variantSchema>;
+// Runtime default, NOT a schema default: Remotion hands defaultProps to the
+// renderer unparsed, so every foundry field must have a real value here too.
 const VARIANT_DEFAULT = {
   skin: "#F2C79B", hair: "#3A2A22", suit: "#4E6E8E", shirt: "#FFFFFF", expression: "neutral" as const,
   hairStyle: "short" as const, glasses: false, beard: "none" as const, gender: "m" as const, age: "adult" as const, outfit: "suit" as const,
+  headwear: "none" as const, accessory: "none" as const, build: "average" as const,
+  height: 1, headScale: 1, overlay: [] as [],
 };
 
 // ── CAST BIBLE ──────────────────────────────────────────────────────────────
@@ -110,10 +202,24 @@ export type CastRole = z.infer<typeof castRole>;
 export const castMemberSchema = z.object({
   name: z.string().default(""), // for the author's benefit; never rendered
   variant: variantSchema,
+  /** What this person is to the story — used when the director needs a role
+   *  and the book cast under its own names. Optional; defaults by key. */
+  role: castRole.optional(),
 });
 export type CastMember = z.infer<typeof castMemberSchema>;
-export const castSchema = z.record(castRole, castMemberSchema);
-export type CastBible = Partial<Record<CastRole, CastMember>>;
+/**
+ * The book's cast, keyed by NAME.
+ *
+ * It used to be keyed by the five generic roles, which is right for a
+ * non-fiction book (there is a narrator and a "you") and wrong for a novel: a
+ * story with Patch, Saint and Grace in it was cast as protagonist/foil/mentor,
+ * so three different people wore the same three costumes in every book on the
+ * channel. The keys are now free strings — `cast.patch`, `cast.saint` — and the
+ * five role names remain valid keys, so every config written before this still
+ * resolves.
+ */
+export const castSchema = z.record(z.string(), castMemberSchema);
+export type CastBible = Record<string, CastMember | undefined>;
 
 /** Runtime fallback — Remotion hands defaultProps to the renderer unparsed. */
 export const DEFAULT_VARIANT: VariantSpec = VARIANT_DEFAULT;
@@ -122,8 +228,9 @@ export const DEFAULT_VARIANT: VariantSpec = VARIANT_DEFAULT;
 export const characterSchema = z.object({
   id: z.string(),
   rig: z.enum(["everyman"]).default("everyman"),
-  /** Who this is. The look comes from meta.cast[role]; `variant` overrides it. */
-  role: castRole.optional(),
+  /** Who this is — a key into meta.cast. Either one of the five generic roles
+   *  or a character's own name (`"patch"`). `variant` overrides the look. */
+  role: z.string().optional(),
   variant: variantSchema.optional(),
   /** Per-scene face, layered over the role's resting expression. */
   expression: expression.optional(),
@@ -135,6 +242,25 @@ export const characterSchema = z.object({
   action: charAction.default("idle"),
   silhouette: z.boolean().optional(), // flat dark cut-out (overShoulder / silhouette shots)
   crowd: z.number().optional(), // >1 → replicate into a depth-staggered crowd
+  /** bust (waist-up, the legacy rig) or full (hips + legs + feet). The SHOT
+   *  supplies this; a scene only sets it to overrule the framing. */
+  body: bodyPlan.optional(),
+  /** What this character is holding — a glyph anchored to the right hand. */
+  holds: handProp.optional(),
+  /**
+   * Start this character's pose clock N frames in.
+   *
+   * A scene is its own <Sequence>, so its local frame resets to 0 — which means
+   * a SUSTAINED beat (same take, no cut) would replay every entry spring: the
+   * seated figure stands up and sits again, the raised arm drops and lifts. The
+   * continuation sets `poseAt` so the pose starts already settled and the walk
+   * cycle picks up mid-stride.
+   */
+  poseAt: z.number().optional(),
+  /** Horizontal travel across the beat, in stage px: [fromDx, toDx]. Pair with
+   *  `action: "walk"` and the figure actually crosses the set instead of
+   *  marching on the spot. */
+  travel: z.tuple([z.number(), z.number()]).optional(),
 });
 export type CharacterSpec = z.infer<typeof characterSchema>;
 
@@ -221,7 +347,16 @@ export type TextSpec = z.infer<typeof textSchema>;
 // ── BACKDROP ────────────────────────────────────────────────────────────────
 // Flat color fields read as "template". A set gives depth (three parallax layers
 // that drift against the camera) and a texture gives the frame its grain.
-export const setName = z.enum(["none", "horizon", "office", "street", "room", "stage", "sky", "abstract"]);
+export const setName = z.enum([
+  "none", "horizon", "office", "street", "room", "stage", "sky", "abstract",
+  // ── REAL PLACES (Antidote 3.0) ────────────────────────────────────────────
+  // Eight abstract fields meant the backdrop never said WHERE a beat happened;
+  // the director now maps the beat's own concept to a location (kitchen for a
+  // dinner-table beat, court for a trial, shore for a lake). Same three-layer
+  // parallax vector budget — no images, no WebGL.
+  "kitchen", "bedroom", "classroom", "library", "cafe", "hospital", "court",
+  "forest", "shore", "highway",
+]);
 export type SetName = z.infer<typeof setName>;
 export const textureName = z.enum(["none", "grain", "dots", "rays", "grid", "paper"]);
 export type TextureName = z.infer<typeof textureName>;

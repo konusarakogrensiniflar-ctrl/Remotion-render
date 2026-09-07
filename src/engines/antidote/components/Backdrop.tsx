@@ -34,10 +34,10 @@ const shade = (color: string, amt: number) => {
   return `rgb(${Math.round(r0 + (to - r0) * a)},${Math.round(g0 + (to - g0) * a)},${Math.round(b0 + (to - b0) * a)})`;
 };
 
-type LayerProps = { ink: string; accent: string; frame: number };
+export type LayerProps = { ink: string; accent: string; frame: number };
 
 // ── sets: [far, mid, near] renderers, drawn in a 1920×1080 viewBox ──────────
-const SETS: Record<string, Array<React.FC<LayerProps>>> = {
+export const SETS: Record<string, Array<React.FC<LayerProps>>> = {
   horizon: [
     ({ ink }) => (
       <g>
@@ -180,6 +180,394 @@ const SETS: Record<string, Array<React.FC<LayerProps>>> = {
           const y = 700 + Math.sin(frame * 0.02 + i) * 46;
           return <circle key={i} cx={x} cy={y} r={9 + (i % 3) * 4} />;
         })}
+      </g>
+    ),
+  ],
+
+  // ── REAL PLACES (Antidote 3.0) ────────────────────────────────────────────
+  // The seven sets above are moods: a horizon, a stage, an abstract field. None
+  // of them says WHERE a beat happens, so a dinner-table beat and a courtroom
+  // beat shared a backdrop and the film had no geography. These are places, with
+  // furniture a figure can stand among — same three-layer parallax vector budget
+  // (no images, no WebGL), and the director now picks them from the beat's own
+  // concept rather than from a genre rotation.
+  kitchen: [
+    ({ ink }) => (
+      <g opacity={0.13}>
+        {/* wall cabinets + backsplash */}
+        <rect x={120} y={130} width={470} height={210} rx={8} fill={ink} />
+        <line x1={355} y1={130} x2={355} y2={340} stroke={ink} strokeWidth={9} />
+        <rect x={1300} y={130} width={400} height={210} rx={8} fill={ink} />
+        <g stroke={ink} strokeWidth={4} opacity={0.7}>
+          {[400, 460, 520].map((y) => <line key={y} x1={620} y1={y} x2={1280} y2={y} />)}
+          {[700, 820, 940, 1060, 1180].map((x) => <line key={x} x1={x} y1={380} y2={540} x2={x} />)}
+        </g>
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g opacity={0.2}>
+        {/* counter run + sink + tap */}
+        <rect x={90} y={600} width={760} height={26} rx={8} fill={ink} />
+        <rect x={110} y={626} width={720} height={300} fill={ink} opacity={0.55} />
+        <rect x={330} y={608} width={190} height={14} rx={6} fill={accent} />
+        <path d="M600,600 L600,548 Q600,530 626,530 L660,530" fill="none" stroke={ink} strokeWidth={11} />
+        {/* fridge */}
+        <rect x={1560} y={430} width={250} height={496} rx={12} fill={ink} opacity={0.6} />
+        <line x1={1560} y1={606} x2={1810} y2={606} stroke={ink} strokeWidth={7} />
+        <rect x={1770} y={520} width={12} height={70} rx={5} fill={accent} />
+        {/* table + two chairs */}
+        <rect x={980} y={720} width={420} height={22} rx={9} fill={ink} />
+        <rect x={1010} y={742} width={16} height={186} fill={ink} />
+        <rect x={1354} y={742} width={16} height={186} fill={ink} />
+        <rect x={1040} y={636} width={16} height={110} fill={ink} opacity={0.7} />
+        <rect x={1330} y={636} width={16} height={110} fill={ink} opacity={0.7} />
+      </g>
+    ),
+    ({ ink }) => (
+      <g>
+        <rect x={-100} y={924} width={2120} height={200} fill={ink} opacity={0.16} />
+        <rect x={-100} y={910} width={2120} height={18} fill={ink} opacity={0.26} />
+      </g>
+    ),
+  ],
+  bedroom: [
+    ({ ink, accent }) => (
+      <g>
+        {/* window + curtains */}
+        <rect x={1180} y={130} width={380} height={340} rx={8} fill={accent} opacity={0.16} />
+        <rect x={1180} y={130} width={380} height={340} rx={8} fill="none" stroke={ink} strokeWidth={9} opacity={0.16} />
+        <line x1={1370} y1={130} x2={1370} y2={470} stroke={ink} strokeWidth={7} opacity={0.16} />
+        <path d="M1120,120 Q1160,300 1130,500 L1200,500 Q1220,300 1200,120 Z" fill={ink} opacity={0.12} />
+        <path d="M1620,120 Q1580,300 1610,500 L1540,500 Q1520,300 1540,120 Z" fill={ink} opacity={0.12} />
+        <rect x={280} y={190} width={220} height={160} rx={6} fill="none" stroke={ink} strokeWidth={8} opacity={0.13} />
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g opacity={0.2}>
+        {/* bed: headboard, mattress, pillow, blanket */}
+        <rect x={200} y={480} width={40} height={330} rx={12} fill={ink} />
+        <rect x={200} y={480} width={520} height={110} rx={16} fill={ink} opacity={0.75} />
+        <rect x={220} y={660} width={780} height={150} rx={16} fill={ink} opacity={0.5} />
+        <rect x={260} y={612} width={190} height={70} rx={22} fill="#FFFFFF" opacity={0.65} />
+        <path d="M520,660 L1000,660 L1000,810 L520,810 Z" fill={accent} opacity={0.45} />
+        <rect x={220} y={806} width={780} height={22} rx={8} fill={ink} />
+        {/* nightstand + lamp */}
+        <rect x={1060} y={700} width={150} height={128} rx={8} fill={ink} opacity={0.7} />
+        <rect x={1126} y={618} width={14} height={84} fill={ink} />
+        <path d="M1088,618 L1178,618 L1160,556 L1106,556 Z" fill={accent} opacity={0.6} />
+      </g>
+    ),
+    ({ ink }) => (
+      <g>
+        <rect x={-100} y={906} width={2120} height={220} fill={ink} opacity={0.15} />
+        <rect x={-100} y={892} width={2120} height={18} fill={ink} opacity={0.24} />
+        <ellipse cx={960} cy={1010} rx={640} ry={54} fill={ink} opacity={0.07} />
+      </g>
+    ),
+  ],
+  classroom: [
+    ({ ink, accent }) => (
+      <g>
+        {/* blackboard + chalk marks + clock */}
+        <rect x={430} y={130} width={1060} height={400} rx={10} fill={ink} opacity={0.2} />
+        <rect x={430} y={130} width={1060} height={400} rx={10} fill="none" stroke={ink} strokeWidth={12} opacity={0.2} />
+        <g stroke="#FFFFFF" strokeWidth={6} opacity={0.28} strokeLinecap="round">
+          <line x1={510} y1={230} x2={980} y2={230} />
+          <line x1={510} y1={300} x2={1220} y2={300} />
+          <line x1={510} y1={370} x2={860} y2={370} />
+        </g>
+        <circle cx={1700} cy={230} r={64} fill="none" stroke={ink} strokeWidth={10} opacity={0.18} />
+        <g stroke={ink} strokeWidth={8} opacity={0.18} strokeLinecap="round">
+          <line x1={1700} y1={230} x2={1700} y2={190} /><line x1={1700} y1={230} x2={1732} y2={244} />
+        </g>
+        <rect x={430} y={530} width={1060} height={18} fill={ink} opacity={0.24} />
+        <rect x={640} y={512} width={90} height={18} rx={7} fill={accent} opacity={0.4} />
+      </g>
+    ),
+    ({ ink }) => (
+      <g opacity={0.19} fill={ink}>
+        {/* two rows of desks */}
+        {[0, 1, 2].map((i) => (
+          <g key={`b${i}`} transform={`translate(${300 + i * 460} 640)`}>
+            <rect x={0} y={0} width={300} height={18} rx={7} />
+            <rect x={16} y={18} width={14} height={110} /><rect x={270} y={18} width={14} height={110} />
+            <rect x={90} y={96} width={130} height={16} rx={6} opacity={0.7} />
+          </g>
+        ))}
+        {[0, 1].map((i) => (
+          <g key={`f${i}`} transform={`translate(${520 + i * 620} 790)`}>
+            <rect x={0} y={0} width={340} height={20} rx={8} />
+            <rect x={18} y={20} width={16} height={126} /><rect x={306} y={20} width={16} height={126} />
+          </g>
+        ))}
+      </g>
+    ),
+    ({ ink }) => (
+      <g>
+        <rect x={-100} y={930} width={2120} height={200} fill={ink} opacity={0.15} />
+        <g stroke={ink} strokeWidth={3} opacity={0.08}>
+          {[0, 240, 480, 720, 960, 1200, 1440, 1680, 1920].map((x) => <line key={x} x1={x} y1={930} x2={x} y2={1080} />)}
+        </g>
+      </g>
+    ),
+  ],
+  library: [
+    ({ ink, accent }) => (
+      <g opacity={0.14}>
+        {/* wall of shelves, books as vertical bands */}
+        {[0, 1, 2, 3, 4].map((r) => (
+          <g key={r} transform={`translate(0 ${120 + r * 150})`}>
+            <rect x={80} y={116} width={1760} height={14} fill={ink} />
+            {Array.from({ length: 44 }).map((_, i) => {
+              const h = 66 + ((i * 37 + r * 11) % 42);
+              return <rect key={i} x={96 + i * 40} y={116 - h} width={26 + (i % 3) * 5} height={h} fill={i % 5 === 0 ? accent : ink} opacity={i % 5 === 0 ? 0.9 : 0.7} />;
+            })}
+          </g>
+        ))}
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g opacity={0.2}>
+        {/* reading table + banker's lamp + chair */}
+        <rect x={620} y={690} width={700} height={24} rx={9} fill={ink} />
+        <rect x={660} y={714} width={20} height={214} fill={ink} />
+        <rect x={1260} y={714} width={20} height={214} fill={ink} />
+        <rect x={900} y={664} width={140} height={28} rx={5} fill="#FFFFFF" opacity={0.6} />
+        <rect x={1140} y={630} width={12} height={62} fill={ink} />
+        <path d="M1104,630 L1188,630 Q1196,630 1192,620 L1108,620 Q1100,620 1104,630 Z" fill={accent} opacity={0.85} />
+        <rect x={1096} y={600} width={104} height={24} rx={10} fill={accent} opacity={0.7} />
+        <rect x={480} y={640} width={18} height={288} fill={ink} opacity={0.6} />
+        <rect x={470} y={632} width={130} height={16} rx={6} fill={ink} opacity={0.6} />
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g>
+        <rect x={-100} y={912} width={2120} height={216} fill={ink} opacity={0.16} />
+        <rect x={420} y={930} width={1080} height={120} rx={10} fill={accent} opacity={0.1} />
+      </g>
+    ),
+  ],
+  cafe: [
+    ({ ink, accent }) => (
+      <g>
+        {/* street window + menu board */}
+        <rect x={90} y={120} width={760} height={430} rx={8} fill={accent} opacity={0.14} />
+        <rect x={90} y={120} width={760} height={430} rx={8} fill="none" stroke={ink} strokeWidth={11} opacity={0.16} />
+        <line x1={470} y1={120} x2={470} y2={550} stroke={ink} strokeWidth={9} opacity={0.16} />
+        <rect x={1180} y={150} width={560} height={300} rx={8} fill={ink} opacity={0.2} />
+        <g stroke="#FFFFFF" strokeWidth={6} opacity={0.3} strokeLinecap="round">
+          <line x1={1240} y1={230} x2={1560} y2={230} /><line x1={1240} y1={300} x2={1660} y2={300} />
+          <line x1={1240} y1={370} x2={1460} y2={370} />
+        </g>
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g opacity={0.2}>
+        {/* pendant lamps */}
+        {[560, 860, 1160].map((x) => (
+          <g key={x}>
+            <line x1={x} y1={0} x2={x} y2={330} stroke={ink} strokeWidth={5} />
+            <path d={`M${x - 54},390 L${x + 54},390 L${x + 30},330 L${x - 30},330 Z`} fill={accent} opacity={0.8} />
+          </g>
+        ))}
+        {/* counter + espresso machine */}
+        <rect x={1120} y={640} width={700} height={26} rx={9} fill={ink} />
+        <rect x={1140} y={666} width={660} height={262} fill={ink} opacity={0.5} />
+        <rect x={1420} y={556} width={150} height={86} rx={8} fill={ink} opacity={0.8} />
+        <rect x={1452} y={532} width={86} height={26} rx={8} fill={accent} opacity={0.7} />
+        {/* round table + two stools */}
+        <ellipse cx={480} cy={718} rx={140} ry={26} fill={ink} />
+        <rect x={470} y={730} width={20} height={196} fill={ink} />
+        <ellipse cx={480} cy={928} rx={78} ry={16} fill={ink} opacity={0.8} />
+        <ellipse cx={250} cy={800} rx={60} ry={16} fill={ink} opacity={0.7} />
+        <rect x={242} y={806} width={16} height={122} fill={ink} opacity={0.7} />
+      </g>
+    ),
+    ({ ink }) => (
+      <g>
+        <rect x={-100} y={924} width={2120} height={200} fill={ink} opacity={0.17} />
+        {/* checker floor — alternating tiles, wider toward camera so the plane reads */}
+        <g fill={ink} opacity={0.08}>
+          {Array.from({ length: 12 }).map((_, i) => <rect key={`a${i}`} x={-40 + i * 176} y={936} width={88} height={56} />)}
+          {Array.from({ length: 11 }).map((_, i) => <rect key={`b${i}`} x={48 + i * 176} y={996} width={104} height={84} />)}
+        </g>
+      </g>
+    ),
+  ],
+  hospital: [
+    ({ ink, accent }) => (
+      <g opacity={0.14}>
+        <rect x={-100} y={0} width={2120} height={520} fill={ink} opacity={0.4} />
+        <rect x={-100} y={506} width={2120} height={16} fill={ink} />
+        <circle cx={330} cy={220} r={62} fill="none" stroke={ink} strokeWidth={10} />
+        <g stroke={ink} strokeWidth={8} strokeLinecap="round">
+          <line x1={330} y1={220} x2={330} y2={182} /><line x1={330} y1={220} x2={358} y2={236} />
+        </g>
+        <rect x={1420} y={150} width={54} height={200} rx={6} fill={accent} />
+        <rect x={1343} y={227} width={208} height={46} rx={6} fill={accent} />
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g opacity={0.2}>
+        {/* bed with raised head + rails */}
+        <rect x={520} y={690} width={780} height={120} rx={14} fill="#FFFFFF" opacity={0.75} />
+        <path d="M520,690 L520,600 Q520,586 546,586 L640,586 Q660,586 660,606 L660,690 Z" fill="#FFFFFF" opacity={0.6} />
+        <rect x={520} y={806} width={780} height={22} rx={8} fill={ink} />
+        <rect x={548} y={828} width={18} height={100} fill={ink} />
+        <rect x={1254} y={828} width={18} height={100} fill={ink} />
+        <rect x={700} y={664} width={420} height={14} rx={6} fill={ink} opacity={0.6} />
+        {/* IV stand + bag */}
+        <rect x={1400} y={470} width={12} height={458} fill={ink} />
+        <rect x={1362} y={470} width={88} height={12} rx={5} fill={ink} />
+        <rect x={1376} y={486} width={60} height={110} rx={12} fill={accent} opacity={0.7} />
+        <path d="M1406,596 Q1406,660 1406,700" fill="none" stroke={ink} strokeWidth={5} />
+        {/* curtain */}
+        <path d="M1640,120 Q1660,500 1636,928 L1900,928 Q1876,500 1900,120 Z" fill={ink} opacity={0.14} />
+      </g>
+    ),
+    ({ ink }) => (
+      <g>
+        <rect x={-100} y={926} width={2120} height={200} fill={ink} opacity={0.13} />
+        <g stroke={ink} strokeWidth={3} opacity={0.07}>
+          {[0, 260, 520, 780, 1040, 1300, 1560, 1820].map((x) => <line key={x} x1={x} y1={926} x2={x} y2={1080} />)}
+        </g>
+      </g>
+    ),
+  ],
+  court: [
+    ({ ink, accent }) => (
+      <g opacity={0.15}>
+        {/* panelled back wall + seal + flanking columns */}
+        <rect x={-100} y={0} width={2120} height={620} fill={ink} opacity={0.35} />
+        {[220, 500, 1420, 1700].map((x) => <rect key={x} x={x} y={60} width={130} height={560} rx={6} fill={ink} opacity={0.5} />)}
+        <circle cx={960} cy={250} r={110} fill="none" stroke={accent} strokeWidth={12} />
+        <circle cx={960} cy={250} r={68} fill={accent} opacity={0.35} />
+        <rect x={100} y={0} width={70} height={620} fill={ink} opacity={0.4} />
+        <rect x={1750} y={0} width={70} height={620} fill={ink} opacity={0.4} />
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g opacity={0.22}>
+        {/* judge's bench + witness box */}
+        <rect x={620} y={560} width={700} height={230} rx={10} fill={ink} opacity={0.75} />
+        <rect x={600} y={540} width={740} height={34} rx={10} fill={ink} />
+        <rect x={700} y={608} width={540} height={130} rx={6} fill={ink} opacity={0.4} />
+        <rect x={1400} y={640} width={280} height={190} rx={8} fill={ink} opacity={0.6} />
+        <rect x={1386} y={624} width={308} height={26} rx={9} fill={ink} />
+        {/* gavel block */}
+        <rect x={870} y={520} width={80} height={22} rx={8} fill={accent} opacity={0.8} />
+      </g>
+    ),
+    ({ ink }) => (
+      <g>
+        <rect x={-100} y={900} width={2120} height={220} fill={ink} opacity={0.18} />
+        {/* the rail between the gallery and the court */}
+        <rect x={-100} y={856} width={2120} height={16} rx={6} fill={ink} opacity={0.3} />
+        {[60, 340, 620, 900, 1180, 1460, 1740].map((x) => <rect key={x} x={x} y={866} width={16} height={64} fill={ink} opacity={0.26} />)}
+      </g>
+    ),
+  ],
+  forest: [
+    ({ ink }) => (
+      <g fill={ink} opacity={0.1}>
+        {Array.from({ length: 16 }).map((_, i) => {
+          const x = -60 + i * 130;
+          const h = 420 + ((i * 53) % 180);
+          return <path key={i} d={`M${x},900 L${x + 34},${900 - h} L${x + 68},900 Z`} />;
+        })}
+      </g>
+    ),
+    ({ ink, frame }) => (
+      <g opacity={0.2}>
+        {[140, 470, 1420, 1760].map((x, i) => (
+          <g key={x} transform={`rotate(${Math.sin(frame / 240 + i) * 0.35} ${x} 900)`}>
+            <path d={`M${x - 34},930 Q${x - 20},560 ${x - 26},170 L${x + 30},170 Q${x + 24},560 ${x + 38},930 Z`} fill={ink} />
+            <path d={`M${x + 24},430 Q${x + 90},390 ${x + 130},330`} fill="none" stroke={ink} strokeWidth={13} strokeLinecap="round" />
+            <path d={`M${x - 22},560 Q${x - 96},522 ${x - 140},468`} fill="none" stroke={ink} strokeWidth={11} strokeLinecap="round" />
+          </g>
+        ))}
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g>
+        <path d="M-100,900 Q400,862 960,896 Q1520,930 2020,884 L2020,1120 L-100,1120 Z" fill={ink} opacity={0.2} />
+        <g fill={accent} opacity={0.18}>
+          {[180, 620, 1180, 1660].map((x, i) => <ellipse key={x} cx={x} cy={960 + (i % 2) * 26} rx={70} ry={20} />)}
+        </g>
+      </g>
+    ),
+  ],
+  shore: [
+    ({ ink }) => (
+      <g>
+        <rect x={0} y={0} width={1920} height={520} fill={ink} opacity={0.05} />
+        <path d="M-100,520 Q220,440 520,516 L520,560 L-100,560 Z" fill={ink} opacity={0.1} />
+        <circle cx={1480} cy={214} r={120} fill={ink} opacity={0.07} />
+      </g>
+    ),
+    ({ ink, frame }) => (
+      <g opacity={0.16} stroke={ink} strokeLinecap="round" fill="none">
+        {Array.from({ length: 7 }).map((_, i) => {
+          const y = 560 + i * 46;
+          const drift = Math.sin(frame / (150 + i * 21) + i) * 26;
+          return (
+            <path
+              key={i}
+              d={`M${-140 + drift},${y} q90,-16 180,0 t180,0 t180,0 t180,0 t180,0 t180,0 t180,0 t180,0 t180,0 t180,0 t180,0`}
+              strokeWidth={7 - i * 0.4}
+            />
+          );
+        })}
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g>
+        <path d="M-100,900 Q560,856 1180,900 Q1620,930 2020,896 L2020,1120 L-100,1120 Z" fill={accent} opacity={0.2} />
+        <g fill={ink} opacity={0.16}>
+          <ellipse cx={300} cy={996} rx={54} ry={26} /><ellipse cx={402} cy={1022} rx={34} ry={16} />
+          <ellipse cx={1560} cy={984} rx={44} ry={20} />
+        </g>
+      </g>
+    ),
+  ],
+  highway: [
+    ({ ink }) => (
+      <g fill={ink} opacity={0.09}>
+        <path d="M-100,640 Q260,520 640,620 Q1000,714 1400,584 Q1700,486 2020,596 L2020,760 L-100,760 Z" />
+        {[240, 700, 1220, 1700].map((x) => (
+          <g key={x}>
+            <rect x={x} y={330} width={12} height={300} />
+            <rect x={x - 60} y={340} width={132} height={12} />
+            <rect x={x - 44} y={382} width={100} height={10} />
+          </g>
+        ))}
+      </g>
+    ),
+    ({ ink, accent }) => (
+      <g opacity={0.2}>
+        {/* guard rail */}
+        <rect x={-100} y={742} width={2120} height={20} rx={8} fill={ink} />
+        {[-40, 200, 440, 680, 920, 1160, 1400, 1640, 1880].map((x) => <rect key={x} x={x} y={762} width={14} height={70} fill={ink} opacity={0.8} />)}
+        {/* overhead sign */}
+        <rect x={1330} y={300} width={16} height={440} fill={ink} />
+        <rect x={1150} y={250} width={430} height={130} rx={10} fill={accent} opacity={0.55} />
+        <g stroke="#FFFFFF" strokeWidth={9} opacity={0.5} strokeLinecap="round">
+          <line x1={1200} y1={296} x2={1470} y2={296} /><line x1={1200} y1={336} x2={1390} y2={336} />
+        </g>
+      </g>
+    ),
+    ({ ink }) => (
+      <g>
+        <rect x={-100} y={838} width={2120} height={280} fill={ink} opacity={0.22} />
+        {/* centre line, widening toward camera */}
+        <g fill="#FFFFFF" opacity={0.3}>
+          {[0, 1, 2, 3, 4].map((i) => {
+            const y = 866 + i * 46;
+            const w = 60 + i * 34;
+            const h = 12 + i * 5;
+            return <rect key={i} x={960 - w / 2} y={y} width={w} height={h} rx={4} />;
+          })}
+        </g>
       </g>
     ),
   ],

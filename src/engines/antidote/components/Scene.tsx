@@ -6,11 +6,12 @@ import { Backdrop } from "./Backdrop";
 import { ChapterCard } from "./ChapterCard";
 import { transitionRender } from "./Transition";
 import { Motif } from "../motifs";
-import { shotPreset, stageChar, stageText } from "../shots";
+import { resolveBody, shotPreset, stageChar, stageText } from "../shots";
 import { DEFAULT_TRANSITION, DEFAULT_VARIANT } from "../schema";
 import { enter, pose, ambient, arcOf } from "../movements";
+import { interpolate } from "remotion";
 import { camera } from "../movements";
-import type { SceneSpec, CharacterSpec, ShotName, VariantSpec, CastBible } from "../schema";
+import type { SceneSpec, CharacterSpec, ShotName, VariantSpec, CastBible, BodyPlan, HandProp } from "../schema";
 
 /**
  * Scene — one beat of the film.
@@ -33,14 +34,17 @@ const mute = (hex: string, amt = 0.55) => {
   return `rgb(${r},${gg},${b})`;
 };
 
-const Rig: React.FC<{ variant: VariantSpec; poseValue: ReturnType<typeof pose>; silhouette?: boolean }> = ({ variant, poseValue, silhouette }) => {
-  if (!silhouette) return <Everyman variant={variant} pose={poseValue} />;
+const Rig: React.FC<{
+  variant: VariantSpec; poseValue: ReturnType<typeof pose>; silhouette?: boolean;
+  body?: BodyPlan; holds?: HandProp; accent?: string;
+}> = ({ variant, poseValue, silhouette, body, holds, accent }) => {
+  if (!silhouette) return <Everyman variant={variant} pose={poseValue} body={body} holds={holds} accent={accent} />;
   // Flat dark cut-out: the overShoulder foreground and the silhouette shot.
   // Fully opaque on purpose — any transparency lets the backdrop bleed through
   // the shoulder and turns the rig's overlapping parts into visible seams.
   return (
     <div style={{ filter: "brightness(0)" }}>
-      <Everyman variant={variant} pose={poseValue} />
+      <Everyman variant={variant} pose={poseValue} body={body} holds={holds} accent={accent} />
     </div>
   );
 };
@@ -58,14 +62,24 @@ function resolveVariant(spec: CharacterSpec, cast?: CastBible): VariantSpec {
 }
 
 // ── a placed, entering, acting character ────────────────────────────────────
-const CharacterLayer: React.FC<{ spec: CharacterSpec; shot: ShotName; index: number; cast?: CastBible }> = ({ spec, shot, index, cast }) => {
+const CharacterLayer: React.FC<{
+  spec: CharacterSpec; shot: ShotName; index: number; cast?: CastBible;
+  durationFrames: number; accent?: string;
+}> = ({ spec, shot, index, cast, durationFrames, accent }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const variant = resolveVariant(spec, cast);
   const st = stageChar(shot, spec, index);
+  const body = resolveBody(shot, spec);
   const e = enter(spec.enter, frame, fps);
-  const p = pose(spec.action, frame, fps);
+  const p = pose(spec.action, frame + (spec.poseAt ?? 0), fps);
   const scale = st.scale * e.scale;
+  // TRAVEL — the figure actually crosses the set over the beat. Without it a
+  // `walk` is a gait cycle on a treadmill: the legs move and the person never
+  // goes anywhere, which reads worse than not animating the legs at all.
+  const travel = spec.travel
+    ? interpolate(frame, [0, Math.max(1, durationFrames)], spec.travel, { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
+    : 0;
   return (
     <div
       style={{
@@ -74,35 +88,52 @@ const CharacterLayer: React.FC<{ spec: CharacterSpec; shot: ShotName; index: num
         top: st.y,
         opacity: e.opacity,
         filter: "drop-shadow(0 16px 28px rgba(0,0,0,0.14))",
-        transform: `translate(-50%, -50%) translate(${e.tx}px, ${e.ty}px) scale(${scale}) scaleX(${st.flip ? -1 : 1})`,
+        transform: `translate(-50%, -50%) translate(${e.tx + travel}px, ${e.ty}px) scale(${scale}) scaleX(${st.flip ? -1 : 1})`,
         transformOrigin: "center",
       }}
     >
-      <Rig variant={variant} poseValue={p} silhouette={st.silhouette} />
+      <Rig variant={variant} poseValue={p} silhouette={st.silhouette} body={body} holds={spec.holds} accent={accent} />
     </div>
   );
 };
 
 // ── the everyman, multiplied — "most people…", "everyone around you…" ───────
-const CrowdLayer: React.FC<{ spec: CharacterSpec; shot: ShotName; cast?: CastBible }> = ({ spec, shot, cast }) => {
+const CrowdLayer: React.FC<{ spec: CharacterSpec; shot: ShotName; cast?: CastBible; accent?: string }> = ({ spec, shot, cast, accent }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const hero = resolveVariant(spec, cast);
   const st = stageChar(shot, spec, 0);
+  const body = resolveBody(shot, spec);
+  const full = body === "full";
   const e = enter(spec.enter, frame, fps);
   const total = Math.max(3, Math.min(12, Math.round(spec.crowd ?? 9)));
-  // three depth rows: back row smallest and most muted, hero stands in front
-  const rows = [
-    { n: Math.min(6, Math.ceil(total * 0.45)), z: 0.6, dy: -132, gap: 250, opacity: 0.5, mutedBy: 0.75 },
-    { n: Math.min(5, Math.ceil(total * 0.33)), z: 0.8, dy: -58, gap: 300, opacity: 0.72, mutedBy: 0.5 },
-    { n: Math.max(1, total - Math.min(6, Math.ceil(total * 0.45)) - Math.min(5, Math.ceil(total * 0.33))), z: 1, dy: 30, gap: 360, opacity: 1, mutedBy: 0 },
-  ];
+  // Three depth rows: back row smallest and most muted, hero stands in front.
+  // Full-body figures are ~1.6x taller and ~40% narrower on the same anchor, so
+  // the rows step further apart vertically and pack tighter horizontally —
+  // otherwise a crowd of whole people is a pile of overlapping heads.
+  const nBack = Math.min(6, Math.ceil(total * 0.45));
+  const nMid = Math.min(5, Math.ceil(total * 0.33));
+  const nFront = Math.max(1, total - nBack - nMid);
+  const rows = full
+    ? [
+        // Gaps must clear the figure's own width (~248px at this scale) or the
+        // rows overlap; the half-gap stagger stops back-row heads landing
+        // directly above front-row heads, which read as one stacked column.
+        { n: nBack, z: 0.6, dy: -196, gap: 258, opacity: 0.5, mutedBy: 0.75, stagger: 0.5 },
+        { n: nMid, z: 0.8, dy: -92, gap: 296, opacity: 0.72, mutedBy: 0.5, stagger: 0 },
+        { n: nFront, z: 1, dy: 34, gap: 330, opacity: 1, mutedBy: 0, stagger: 0.5 },
+      ]
+    : [
+        { n: nBack, z: 0.6, dy: -132, gap: 250, opacity: 0.5, mutedBy: 0.75 },
+        { n: nMid, z: 0.8, dy: -58, gap: 300, opacity: 0.72, mutedBy: 0.5 },
+        { n: nFront, z: 1, dy: 30, gap: 360, opacity: 1, mutedBy: 0 },
+      ];
   return (
     <>
       {rows.map((row, ri) =>
         Array.from({ length: row.n }).map((_, i) => {
           const isHero = ri === 2 && i === Math.floor(row.n / 2);
-          const offset = (i - (row.n - 1) / 2) * row.gap;
+          const offset = (i - (row.n - 1) / 2 + ((row as { stagger?: number }).stagger ?? 0)) * row.gap;
           const phase = ri * 37 + i * 53; // deterministic desync so nobody breathes in lockstep
           const variant = isHero
             ? hero
@@ -122,7 +153,7 @@ const CrowdLayer: React.FC<{ spec: CharacterSpec; shot: ShotName; cast?: CastBib
                 zIndex: ri,
               }}
             >
-              <Rig variant={variant} poseValue={p} silhouette={st.silhouette} />
+              <Rig variant={variant} poseValue={p} silhouette={st.silhouette} body={body} holds={isHero ? spec.holds : undefined} accent={accent} />
             </div>
           );
         }),
@@ -198,9 +229,9 @@ export const Scene: React.FC<{ scene: SceneSpec; transIn?: number; cast?: CastBi
         })}
         {bodies.map((c, i) =>
           c.crowd && c.crowd > 1 ? (
-            <CrowdLayer key={c.id} spec={c} shot={scene.shot} cast={cast} />
+            <CrowdLayer key={c.id} spec={c} shot={scene.shot} cast={cast} accent={accent} />
           ) : (
-            <CharacterLayer key={c.id} spec={c} shot={scene.shot} index={i} cast={cast} />
+            <CharacterLayer key={c.id} spec={c} shot={scene.shot} index={i} cast={cast} durationFrames={scene.durationFrames} accent={accent} />
           ),
         )}
         {(scene.texts ?? []).map((tx, i) => {

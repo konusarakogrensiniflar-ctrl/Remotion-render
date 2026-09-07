@@ -21,13 +21,117 @@ Conventions:
 |---|---|---|---|
 | worker-orchestrator | `scripts/render.js` (multi-worker REST dispatch), `render-accounts.json`, `.github/workflows/render-video.yml` | landed (local, unpushed commits up to b7a04c0) | pooled GitHub-Actions render across accounts; round-robin |
 | antidote-pipeline | download+cleanup half of the pool (`scripts/render-github-{download,cleanup}.js`, `scripts/lib/render-pool.js`), coordination log | landed | done; not pushed to origin (local commit on top of worker-orchestrator's b7a04c0) |
-| _(none — render-isolation finished; see 2026-09-04 changelog entries)_ | | | |
+| _(none — Antidote 3.0 landed; see the 2026-09-07 changelog entry)_ | | | |
 
 _(clear your row when you stop; move the summary into the Changelog below.)_
 
 ---
 
 ## Changelog (newest first)
+
+### 2026-09-07 — antidote-body — Antidote 3.1: the Character Foundry (book-specific cast)
+
+The 3.0 entry below gave the rig a body. This gives it an identity per book. **Still no SFX
+work** — that half of the roadmap remains deliberately untouched.
+
+**The problem.** One rig, five hardcoded roles, four outfits, recolored per palette: a viewer
+who watched two of our videos saw the same five actors in the same three coats. The reference
+channel redraws a cast per book; we can't, and we don't have to — what makes a character read
+as belonging to a book is SILHOUETTE, and silhouette is parametric.
+
+- **NEW `src/engines/antidote/wardrobe.tsx`** — the parts bin. 13 garments (coat, dress,
+  apron, armor, overalls, vest, cloak, hoodie, rags + the original four), 13 headwear pieces
+  (fedora, topHat, bonnet, hood, helmet, crown, cowboy, beret, veil, headscarf, cap, beanie),
+  12 hair styles, 6 beards, 9 worn accessories. Two colors each so they read at `wide` scale.
+- **Proportions.** `variant.height` scales the figure **about the ground** (a child and an
+  adult stand on the same floor line), `build` widens the body and never the face,
+  `headScale` grows the head from the neck up. Child = height 0.74 / headScale 1.2.
+- **Named cast.** `meta.cast` is now `z.record(z.string(), …)`: `cast.patch`, `cast.saint`,
+  each with an optional `role`. `plan-antidote.js` maps the director's role → the cast key
+  (`roleIndex`), so scenes still say "protagonist" and get Patch. The five role names remain
+  valid keys — **every pre-3.1 config resolves unchanged**.
+- **NEW `scripts/lib/antidote-costume.js`** — reads a wardrobe WORLD off the narration
+  (modern · office · academic · jazzAge · victorian · medieval · military · rural ·
+  dystopian) and casts five distinct people from gendered pools, deterministic from the slug,
+  no slot repeating inside a book. Verified with no hand input: Gatsby→jazzAge,
+  Handmaid's Tale→dystopian, Psychology of Money→office, Fences→rural, Odyssey→medieval.
+- **Claude-first casting.** `plan-antidote.js --emit-cast=<f>` dumps the auto-cast plus the
+  wardrobe vocabulary; `--cast=<f>` consumes it, merging **per field** so three authored
+  fields inherit a coherent variant for the rest. `--world=<name>` forces a world.
+- **Escape hatch.** `variant.overlay` = raw SVG paths in rig units, for a signature feature no
+  combination reaches (eyepatch, chest plate, scar). Data, not per-book code.
+- **Rig fixes found by rendering.** The hold put the object in front of the garment with the
+  hand still behind it (object floated) → the forearm + hand are redrawn in front on the same
+  transform chain. The sit splayed 66° and read as a sumo squat in empty space → 24° with a
+  shorter foreshortened thigh, and **the rig now brings its own stool**, because no pose reads
+  as sitting without something under it.
+- **`Antidote-cast-sheet`** is now a foundry sheet: 14 people from 9 worlds on one baseline.
+- **Files:** `src/engines/antidote/{wardrobe.tsx,schema.ts,CastSheet.tsx,lab.ts,
+  characters/Everyman.tsx}`, `scripts/lib/antidote-costume.js`, `scripts/plan-antidote.js`,
+  `SKILL.md`, `scripts/README.md`.
+
+**Where to take this next** (deliberately left open — the pieces are in place):
+1. **Cast the catalog.** Every existing Antidote book still carries the old five-actor bible.
+   `--emit-cast` → Claude → `--cast` on each one is a pure win and needs no engine work.
+2. **The audit still reports ~20 windows over 8s on a 36-min plan** (down from 157). The
+   remaining ones are all "callout lands early, then a long tail". A sub-beat clock like Vox's
+   would close it; see SKILL §9.3b for the Vox version.
+3. **`walk`/`sit`/`hold` are rationed by fixed cooldowns** in the director. They should be
+   driven by the narration instead (a beat that says "she walked out" should walk), the same
+   way `CONCEPT_SET` picks a location.
+4. **Wardrobe gaps:** no children's clothing distinct from adult, no uniforms per service, no
+   two-tone garments. Adding a slot means a part in `wardrobe.tsx`, an enum in `schema.ts`, a
+   pool entry in `antidote-costume.js`, and a cell in `CastSheet.tsx` — in that order.
+5. **`overlay` is unused so far.** The first book that needs a signature character (an
+   eyepatch, a prosthetic, armor plate) is the test of whether the escape hatch is usable.
+6. **Sets are drawn but not lit.** Every set is flat ink at low opacity; a per-act light
+   direction (warm low sun in resolution, cold overhead in tension) would cost one gradient.
+
+### 2026-09-07 — antidote-body — Antidote 3.0: full-body rig, real locations, sustained takes, and a visual-event gate
+
+Goal: close the gap between our Antidote engine and the hand-animated reference channel on the
+four things that actually read as animation. **No SFX work — that half of the roadmap is
+deliberately untouched.**
+
+- **Full-body rig (`characters/Everyman.tsx`).** Two body plans: `bust` (400×600, the original)
+  and `full` (400×900 — hips, thighs, shins, feet). Arms gained an **elbow**, so a hand can
+  come across the body. `shots.ts` opts a shot in via a separate `charsFull` slot table
+  (`wide`, `crowd`, `diorama`, `illustration`, `lowAngle`, `silhouette`).
+  **`resolveBody()` compatibility rule:** an explicit `body` wins; otherwise any character with
+  explicit `x`/`y`/`scale` stays `bust`. Hand-directed books (hidden-potential, psychology-of-money,
+  a-gentleman-in-moscow…) re-render identically; only auto-staged characters grow legs.
+- **Business.** New actions `walk` · `sit` · `hold` · `reach` (`movements.ts`, incl. `gait()`),
+  plus character fields `holds` (glyph in the right hand — new `handprops.tsx`, 14 objects) and
+  `travel: [fromDx,toDx]` (the figure crosses the set; a gait without travel is a treadmill).
+  Rationed by the director: hold ≥5 beats apart, walk ≥7, sit ≥9.
+- **Real locations (`components/Backdrop.tsx`).** Ten new sets — kitchen, bedroom, classroom,
+  library, cafe, hospital, court, forest, shore, highway — with furniture, on the same
+  three-layer parallax vector budget. `CONCEPT_SET` in the director maps the beat's subject to a
+  place; it only overrides the genre rotation when we haven't just moved, and decays after 8 beats.
+- **Sustained takes.** `SUSTAINABLE` shots carry across up to 3 beats: same shot/set/cast,
+  `cut/0`, camera **continues** its move. A sustained beat must carry its own callout — the
+  first version sustained silent beats and the audit caught 30-second dead windows.
+- **Cuts land in the breath (`plan-antidote.js`).** An ASR VTT has no silences: word end times
+  are just the next word's start, so caption gaps were 0 for 866/875 captions. The pause hides
+  in the SLOT — a two-letter word occupying 20 frames is a speaker who stopped. Cuts now snap to
+  that surplus. Avg scene 9.8 s → 8.9 s against a 6.5 s target.
+- **NEW `scripts/audit-antidote.js` — the visual-event budget.** Counts every frame the picture
+  changes (cut / callout / motif / punch / card) and **exits 1 when any window exceeds
+  `--max-gap` (default 8 s)**. Also reports presenter-shot share, full-body share, sustained
+  takes, held props, distinct locations, longest same-shot run, and scenes with no event at all.
+  `--all` sweeps the catalog, `--soft` never fails, `--json` for tooling.
+- **Measured** (36-min plan, `the-great-gatsby.vtt` → scratch config, never written to a book):
+  worst dead window **31 s → 13 s**, events **378 → 792** (10 → 22/min), windows over budget
+  **157 → 20**, silent scenes **→ 0**, locations 4 → 15, full-body 0% → 38%.
+  The audit is what found each fix — event floor for callout-less beats, mid-beat push on long
+  beats, a late second motif on long or front-loaded beats.
+- **Dev reel:** `Antidote-lab` (`src/engines/antidote/lab.ts`), registered in `Root.tsx`, runs
+  the 3.0 capabilities through the ordinary `AntidoteBook` path.
+- **Files:** `src/engines/antidote/{schema.ts,movements.ts,shots.ts,handprops.tsx,lab.ts,
+  characters/Everyman.tsx,components/{Scene.tsx,Backdrop.tsx}}`, `src/Root.tsx`,
+  `scripts/{plan-antidote.js,audit-antidote.js}`, `scripts/lib/antidote-director.js`, `SKILL.md`.
+- **Vox untouched.** No book config was rewritten; existing plans render as before until
+  re-planned.
 
 ### 2026-09-05 — antidote-engine-v2 — Universal Editorial Engine & SFX Audio Design
 

@@ -139,6 +139,57 @@ const OPPOSITE = {
   war: "heart", crash: "medical", notes: "fire",
 };
 
+// ── CONCEPT → LOCATION ──────────────────────────────────────────────────────
+// The backdrop used to rotate through a genre's four abstract sets on a fixed
+// run length, so it never said WHERE a beat happened: a dinner-table beat and a
+// courtroom beat shared a field. The engine now owns real places, and the beat's
+// own subject picks one. A location still HOLDS for a run (a set that changes
+// every beat is strobing, not geography) — this only overrides the rotation when
+// the narration has actually moved somewhere.
+const CONCEPT_SET = {
+  home: "room", family: "kitchen", food: "kitchen",
+  school: "classroom", notes: "library", book: "library",
+  work: "office", briefcase: "office", medical: "hospital", law: "court",
+  city: "street", road: "highway", crash: "highway",
+  water: "shore", tree: "forest", grave: "forest",
+  storm: "sky", star: "sky", heart: "cafe", phone: "cafe",
+  mirror: "bedroom", photo: "bedroom", key: "room",
+  game: "stage", war: "horizon", ledge: "street",
+};
+// Places a figure can plausibly SIT in — the sit pose needs furniture behind it
+// or it reads as a person crouching in a void.
+const SEATED_SETS = new Set(["kitchen", "cafe", "library", "classroom", "hospital", "bedroom", "office", "room"]);
+// Places that are outdoors and wide — where WALKING across the frame reads.
+const WALKABLE_SETS = new Set(["street", "highway", "forest", "shore", "horizon", "city", "sky"]);
+// Shots that draw the full rig (must mirror charsFull in src/engines/antidote/shots.ts).
+// Only these can show legs, so only these can walk or sit.
+const FULL_BODY_SHOTS = new Set(["wide", "crowd", "diorama", "illustration", "lowAngle", "silhouette"]);
+
+// ── CONCEPT → HAND PROP ─────────────────────────────────────────────────────
+// The motif library and the rig never touched: a beat about a letter drew a
+// 500px letter NEXT TO a person whose hands hung at their sides. When the
+// subject is something a person can hold, the person holds it.
+const CONCEPT_HOLD = {
+  notes: "notes", phone: "phone", key: "key", photo: "photo", book: "book",
+  coin: "coin", mirror: "mirror", mask: "mask", lightbulb: "lightbulb",
+  compass: "compass", food: "cup", heart: "flower", work: "briefcase",
+  law: "letter", school: "book", medical: "notes",
+};
+// Shots where the cast is present AND its hands are in frame. `closeUp` is
+// deliberately absent: at that scale the hands are below the bottom edge, so a
+// hold there spends the beat's business on an object nobody can see.
+const HOLDABLE_SHOTS = new Set(["medium", "twoShot", "overShoulder", "wide", "lowAngle"]);
+
+// ── SUSTAINED SHOTS ─────────────────────────────────────────────────────────
+// Every beat used to reset the stage: new shot, new backdrop, new transition,
+// every ~6.5s, for 45 minutes. That is a very well-cut SLIDE DECK, and it is the
+// clearest structural difference from a hand-animated channel, where a shot
+// begins, develops and ends across several sentences. A sustained beat keeps the
+// previous shot, set and cast, cuts on nothing, and CONTINUES the camera move —
+// so two or three beats read as one continuous take.
+const SUSTAINABLE = new Set(["medium", "wide", "twoShot", "closeUp", "diorama", "overShoulder"]);
+const MAX_SUSTAIN = 2; // extra beats added to a take; 3 beats total is the ceiling
+
 // ── shot candidates per beat class (ranked) ─────────────────────────────────
 const SHOT_MENU = {
   title: ["lowAngle", "medium", "wide"],
@@ -254,6 +305,15 @@ function createDirector({ palette, genre, slug }) {
     scenesSinceInterrupt: 0,
     lastConceptAt: {}, // concept -> scene index (per-icon cooldown)
     scenesSinceIllustration: 99,
+    // sustained-take bookkeeping
+    sustainRun: 0, // how many beats the current take has already been extended by
+    prev: null, // the previous beat's full decision, so a take can continue it
+    lastHoldAt: -99,
+    lastHold: "",
+    lastWalkAt: -99,
+    lastSitAt: -99,
+    forcedSet: "", // a location the narration moved us to
+    forcedSetAt: -99,
   };
 
   // ── COLOR SCRIPT ──────────────────────────────────────────────────────────
@@ -390,7 +450,7 @@ function arcFor(cls, motif) {
    * Direct one beat.
    * @returns {{shot,transition,bg,props,cast,camera,class:string}}
    */
-  function direct({ text, index, isTitle, calloutAt, total, concept: authoredConcept }) {
+  function direct({ text, index, isTitle, calloutAt, total, durationFrames, concept: authoredConcept }) {
     const cls = isTitle ? "title" : classify(text);
 
     // ── SUBJECT → illustration shot ──────────────────────────────────────────
@@ -434,7 +494,75 @@ function arcFor(cls, motif) {
             : "illustration"
         : pickShot(cls, index);
 
-    // location: hold a set for a run of 5–7 beats, then move
+    // ── SUSTAIN: is this beat a continuation of the previous take? ──────────
+    // A sustained beat is deliberately NOT re-directed: same shot, same set,
+    // same cast, no transition, and the camera picks up where it left off. That
+    // is what turns three cuts into one developing take.
+    const prev = state.prev;
+    const canSustain =
+      !!prev && !isTitle && index > 0 &&
+      !useIllustration && !prev.usedIllustration &&
+      SUSTAINABLE.has(prev.shot) &&
+      state.sustainRun < MAX_SUSTAIN &&
+      // A take may only be extended by a beat that CARRIES something. Sustaining
+      // a silent beat doesn't create a continuous shot, it creates dead air: the
+      // audit caught 30-second windows with nothing on screen but a slow drift.
+      calloutAt != null &&
+      // only carry a take through beats that don't demand their own structure
+      (cls === "neutral" || cls === "story" || cls === prev.class) &&
+      cls !== "stat" && cls !== "crowd" && cls !== "contrast";
+    if (canSustain) {
+      state.sustainRun += 1;
+      const camPrev = prev.camera;
+      // continue the same move rather than restarting it — a re-started drift is
+      // exactly what makes a "continuous" take read as another cut
+      const dz = camPrev.zoom[1] - camPrev.zoom[0];
+      const dx = camPrev.panX[1] - camPrev.panX[0];
+      const clampZ = (z) => Math.max(0.94, Math.min(1.2, z));
+      const camera = {
+        zoom: [clampZ(camPrev.zoom[1]), clampZ(camPrev.zoom[1] + dz * 0.8)],
+        panX: [camPrev.panX[1], camPrev.panX[1] + dx * 0.8],
+        panY: [camPrev.panY[1], camPrev.panY[1]],
+      };
+      if (calloutAt != null) camera.punch = { at: calloutAt, amount: cls === "stat" ? 0.09 : 0.05 };
+      // Carry the lead's business into the continuation. A held object stays in
+      // the hand and a walk keeps going FROM WHERE IT STOPPED — restarting the
+      // travel range would teleport the figure back across the frame, which is
+      // the opposite of a continuous take. `continued` tells the planner to
+      // start the pose clock late so no entry spring replays.
+      const pb = prev.cast.business;
+      let carried = pb;
+      if (pb && pb.travel) {
+        const clamp = (v) => Math.max(-420, Math.min(420, v));
+        const end = pb.travel[1];
+        carried = { ...pb, travel: [clamp(end), clamp(end + (pb.travel[1] - pb.travel[0]) * 0.6)] };
+      }
+      const out = {
+        shot: prev.shot,
+        transition: { type: "cut", frames: 0 },
+        bg: prev.bg,
+        props: [],
+        cast: { ...prev.cast, business: carried, continued: true },
+        camera,
+        class: cls,
+        act: prev.act,
+        concept: null,
+        sustain: true,
+      };
+      state.recentShots.push(prev.shot);
+      state.lastUsedAt[prev.shot] = index;
+      state.scenesSinceInterrupt += 1;
+      state.scenesSinceIllustration += 1;
+      state.setRun += 1;
+      state.prev = { ...out, usedIllustration: false };
+      return out;
+    }
+    state.sustainRun = 0;
+
+    // ── location ────────────────────────────────────────────────────────────
+    // Default: hold a set for a run of 5–7 beats, then rotate. Override: when
+    // the beat's concept names a real place we haven't just been in, MOVE there
+    // — that is the difference between a backdrop and a location.
     const runLength = 5 + (index % 3);
     let setChanged = false;
     if (index === 0) {
@@ -445,7 +573,17 @@ function arcFor(cls, motif) {
       setChanged = true;
     }
     state.setRun += 1;
-    const set = sets[state.setIndex % sets.length];
+    const placed = concept ? CONCEPT_SET[concept] : null;
+    if (placed && placed !== state.forcedSet && index - state.forcedSetAt >= 3) {
+      state.forcedSet = placed;
+      state.forcedSetAt = index;
+      state.setRun = 1;
+      setChanged = index > 0;
+    } else if (state.forcedSet && index - state.forcedSetAt >= 8) {
+      // a location isn't sticky forever; fall back to the genre rotation
+      state.forcedSet = "";
+    }
+    const set = state.forcedSet || sets[state.setIndex % sets.length];
     const field = colorScript(total ? index / total : 0, cls);
 
     const bg = {
@@ -479,7 +617,11 @@ function arcFor(cls, motif) {
     // On an illustration/diorama the scene icon IS the shot; beforeAfter places
     // two icons + an arrow; otherwise a metaphor motif fires on insert (mandatory)
     // or ~1 beat in 3.
-    const wantsMotif = shot === "insert" || rnd(seedBase + index * 13) < 0.34;
+    // A beat with NO callout has nothing else to offer the frame, so it always
+    // gets its metaphor. This is the visual-event floor the audit enforces —
+    // before it, a callout-less beat was a person standing on a gradient for
+    // eight seconds, and a run of them was half a minute of nothing.
+    const wantsMotif = shot === "insert" || calloutAt == null || rnd(seedBase + index * 13) < 0.34;
     let props;
     if (!useIllustration) {
       props = wantsMotif ? [pickMotif(cls, shot, index, text)] : [];
@@ -502,6 +644,39 @@ function arcFor(cls, motif) {
     else if (shot === "twoShot" || shot === "split" || shot === "overShoulder") castCount = 2;
     const cast = { count: castCount, crowd: shot === "crowd" ? 7 + (index % 5) : 0, roles: castRoles(cls, castCount, index) };
 
+    // ── BUSINESS: what the lead actually DOES with their body ───────────────
+    // Rationed on purpose. A rig that walks in every wide and holds something in
+    // every medium stops reading as behaviour and starts reading as a tic; these
+    // land often enough to register and rarely enough to stay an event.
+    const full = FULL_BODY_SHOTS.has(shot);
+    let business = null;
+    const holdProp = concept ? CONCEPT_HOLD[concept] : null;
+    if (
+      castCount > 0 && holdProp && HOLDABLE_SHOTS.has(shot) &&
+      index - state.lastHoldAt >= 5 && holdProp !== state.lastHold
+    ) {
+      business = { action: "hold", holds: holdProp };
+      state.lastHoldAt = index;
+      state.lastHold = holdProp;
+    } else if (
+      castCount > 0 && full && WALKABLE_SETS.has(set) &&
+      (cls === "story" || cls === "time" || cls === "neutral") &&
+      index - state.lastWalkAt >= 7
+    ) {
+      // travel direction alternates so the film doesn't always drift one way
+      const dir = index % 2 === 0 ? 1 : -1;
+      business = { action: "walk", travel: [-150 * dir, 150 * dir] };
+      state.lastWalkAt = index;
+    } else if (
+      castCount > 0 && full && SEATED_SETS.has(set) &&
+      (cls === "question" || cls === "negative" || cls === "neutral") &&
+      index - state.lastSitAt >= 9
+    ) {
+      business = { action: "sit" };
+      state.lastSitAt = index;
+    }
+    cast.business = business;
+
     // camera: a slow drift + a punch on the callout frame
     const driftIn = index % 2 === 0;
     const wideish = shot === "wide" || shot === "crowd" || shot === "split";
@@ -511,6 +686,26 @@ function arcFor(cls, motif) {
       panY: shot === "lowAngle" ? [18, -10] : [0, 0],
     };
     if (calloutAt != null) camera.punch = { at: calloutAt, amount: cls === "stat" ? 0.09 : 0.055 };
+    // ── LONG-BEAT EVENT FLOOR ────────────────────────────────────────────────
+    // A beat that runs 7+ seconds on one event is a still frame with a slow
+    // drift on it. When there is no callout to punch on, the camera pushes in
+    // once mid-beat; when the beat is very long, a second motif arrives late so
+    // the frame changes again. Both are cheap and both are things the viewer
+    // sees. (Measured by scripts/audit-antidote.js — this is what took the worst
+    // dead window on a 36-minute plan from 31s to single digits.)
+    const beatSecs = durationFrames ? durationFrames / 30 : 0;
+    if (calloutAt == null && beatSecs >= 6.5) {
+      camera.punch = { at: Math.round(durationFrames * 0.55), amount: 0.05 };
+    }
+    // A long beat also needs something in its BACK HALF. The worst remaining
+    // windows were all "callout lands at second two, then eleven seconds of
+    // drift" — so a beat that is long, or whose only event fires in its first
+    // third, gets a second smaller motif late.
+    const frontLoaded = calloutAt != null && calloutAt < durationFrames * 0.35;
+    if ((beatSecs >= 10 || (beatSecs >= 7.5 && frontLoaded)) && !useIllustration && shot !== "insert" && shot !== "beforeAfter") {
+      const late = pickMotif(cls, shot, index + 501, text);
+      props = [...props, { ...late, at: Math.round(durationFrames * 0.66), enter: "fade", scale: 0.6 }];
+    }
 
     // bookkeeping
     state.recentShots.push(shot);
@@ -523,7 +718,9 @@ function arcFor(cls, motif) {
       state.scenesSinceIllustration += 1;
     }
 
-    return { shot, transition, bg, props, cast, camera, class: cls, act: field.act, concept: useIllustration ? concept : null };
+    const out = { shot, transition, bg, props, cast, camera, class: cls, act: field.act, concept: useIllustration ? concept : null, sustain: false };
+    state.prev = { ...out, usedIllustration: useIllustration };
+    return out;
   }
 
   function stats() {
@@ -538,4 +735,5 @@ function arcFor(cls, motif) {
 module.exports = {
   createDirector, classify, detectConcept, lighten, darken,
   SCENE_ICONS: CONCEPT_LEXICON.map(([c]) => c),
+  CONCEPT_SET, CONCEPT_HOLD, FULL_BODY_SHOTS,
 };

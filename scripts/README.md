@@ -12,6 +12,13 @@ Active pipeline scripts. Run from repo root: `node scripts/<name>.js`
 - **plan-antidote.js** — VTT → Antidote config (scenes/kinetic text/characters)
 - **plan-meta.js** — YouTube metadata + thumbnail brief (Vox books)
 - **plan-antidote-meta.js** — YouTube metadata + thumbnail brief (Antidote books)
+- **lib/antidote-costume.js** — the Character Foundry's casting director: reads a wardrobe
+  WORLD off the narration (1920s, regime, farm, war, pre-modern…) and casts five visibly
+  different people from it. `plan-antidote.js --emit-cast` / `--cast` hands it to Claude.
+- **audit-antidote.js** — visual-event budget for an Antidote plan: fails when any window
+  runs longer than `--max-gap` (default 8s) with nothing happening on screen. Also reports
+  presenter-shot share, full-body share, sustained takes, held props and distinct locations.
+  `--slug=<slug>` · `--all` · `--soft` · `--json`
 
 ## Rendering
 - **render.js** — unified render orchestrator (local/github/lambda)
