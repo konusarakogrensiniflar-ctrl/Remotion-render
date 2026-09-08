@@ -1,0 +1,9 @@
+{
+  "slug": "supercommunicators",
+  "title": "Supercommunicators",
+  "author": "Charles Duhigg",
+  "genre": "nonfiction",
+  "engine": "antidote",
+  "engineRationale": "No strong signal for \"nonfiction\"; defaulting to Antidote (higher conversion). Override with --engine=vox if the concept requires photoreal depictions of real people.",
+  "bgTint": true
+}
