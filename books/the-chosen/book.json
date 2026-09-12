@@ -1,0 +1,16 @@
+{
+  "slug": "the-chosen",
+  "title": "The Chosen",
+  "author": "Chaim Potok",
+  "genre": "fiction",
+  "engine": "vox",
+  "engineRationale": "Period literary fiction set in 1940s Brooklyn with specific, vividly depictable characters (Danny Saunders, Reuven Malter, Reb Saunders, David Malter) and distinct historical/cultural tableaux — photoreal Flux cut-outs of period figures fit far better than an abstract vector rig.",
+  "bgTint": true,
+  "palette": {
+    "paper": "#F3EFE8",
+    "ink": "#15181E",
+    "red": "#1E3A8A",
+    "gold": "#C48B28"
+  }
+}
+
