@@ -61,8 +61,18 @@ jobs:
       - name: Generate Books Registry
         run: node scripts/gen-books-registry.js
 
+      # Mastering is NOT optional. The bundle only ever ships the RAW audio
+      # (*.mastered.m4a is gitignored), and render-bundle.js re-points meta.audio
+      # at that raw file, so this step is what brings the -14 LUFS master into
+      # existence and repoints the config at it. It used to end in
+      # `|| echo "master-audio skipped"`, which meant a mastering failure was
+      # swallowed and the render shipped the quiet raw audio - or, when the config
+      # still named the mastered file, SILENCE. Either way the post-render ffprobe
+      # check passed, because it verifies duration and decode, not loudness. Fail
+      # loudly here instead: burning ~45 min of runner time on an unusable master
+      # is far worse than stopping now.
       - name: Master audio
-        run: node scripts/master-audio.js --slug="${{ github.event.inputs.slug }}" --update-config || echo "master-audio skipped"
+        run: node scripts/master-audio.js --slug="${{ github.event.inputs.slug }}" --update-config
 
       - name: Render Video (Local Chunking on Runner)
         run: |
