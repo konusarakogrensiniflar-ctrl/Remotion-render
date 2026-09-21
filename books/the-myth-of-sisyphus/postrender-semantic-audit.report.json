@@ -1,0 +1,1576 @@
+{
+  "version": "P1.1",
+  "slug": "the-myth-of-sisyphus",
+  "status": "FAIL",
+  "metric": {
+    "semantic_visual_coverage": 0,
+    "foreign_world_leakage": 0,
+    "unresolved_character_identity_mismatch": 0,
+    "sampled_frames": 25,
+    "reviewed_frames": 0
+  },
+  "samples": [
+    {
+      "index": 0,
+      "sceneId": "intro",
+      "frame": 145,
+      "seconds": 4.83,
+      "narration": "The opening line isn't an academic puzzle. It's a knife. There is only one truly serious philosophical problem and that is suicide.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "grave",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "grave"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "grave"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "grave",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "viewer",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 11,
+      "sceneId": "scene-11",
+      "frame": 3360,
+      "seconds": 112,
+      "narration": "It is. It is the human impulse to invent comforting false heavens. It is making these desperate leaps of faith just to escape the hard cold reality of So stripp",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "chains",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "chains"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "chains"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "chains",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "sit",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 22,
+      "sceneId": "scene-22",
+      "frame": 6558,
+      "seconds": 218.6,
+      "narration": "That word amazement is so crucial there. It really is. Weariness usually comes at the end of a long day of mechanical life.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "chains",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "chains"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "chains"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "chains",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "sit",
+            "gaze": "motif",
+            "state": "surprised"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 34,
+      "sceneId": "scene-34",
+      "frame": 9817,
+      "seconds": 327.23,
+      "narration": "We assign it human utility. We make it about us.\" Exactly. But in this moment of lucidity, the tree is just a terrifying alien",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "tree",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "tree"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "tree"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "tree",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "worried"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 45,
+      "sceneId": "scene-45",
+      "frame": 13052,
+      "seconds": 435.07,
+      "narration": "back. or when you see an old photograph of yourself and feel an alarming disconnect. The familia becomes utterly alien.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "mirror",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "mirror"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "mirror"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "mirror",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 56,
+      "sceneId": "scene-56",
+      "frame": 15858,
+      "seconds": 528.6,
+      "narration": "cold silence of the world. It depends as much on man as it does on the world. It is the only bond uniting",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "the_strange",
+        "narrativeRelation": "rises_up_to_face_you",
+        "narrativeState": "uncanny",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "shadowSelf"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "horizon"
+        ],
+        "allowedProps": [
+          "shadowSelf"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "the_strange",
+            "shadowSelf",
+            "everyman",
+            "horizon"
+          ],
+          "relations": [
+            "rises_up_to_face_you"
+          ],
+          "states": [
+            "uncanny"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 67,
+      "sceneId": "scene-67",
+      "frame": 18894,
+      "seconds": 629.8,
+      "narration": "And that brings us back to the knife, the opening question, right? Because if you're listening to this, a very logical question arises.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "the_essay",
+        "narrativeRelation": "states_its_thesis",
+        "narrativeState": "declared",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "notes"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "narrator"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "notes"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "the_essay",
+            "notes",
+            "narrator",
+            "manuscript"
+          ],
+          "relations": [
+            "states_its_thesis"
+          ],
+          "states": [
+            "declared"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "narrator",
+            "role": "dialogue_host",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 78,
+      "sceneId": "scene-78",
+      "frame": 21659,
+      "seconds": 721.97,
+      "narration": "physically killed They did something else. Something Cis thinks is actually much more insidious. They commit what he calls philosophical This is a huge concept.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "the_break",
+        "narrativeRelation": "splits_the_stage_open",
+        "narrativeState": "ruptured",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "crack"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "camus"
+        ],
+        "allowedLocations": [
+          "stage"
+        ],
+        "allowedProps": [
+          "crack"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "the_break",
+            "crack",
+            "camus",
+            "stage"
+          ],
+          "relations": [
+            "splits_the_stage_open"
+          ],
+          "states": [
+            "ruptured"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "camus",
+            "role": "author_voice",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 89,
+      "sceneId": "scene-89",
+      "frame": 24687,
+      "seconds": 822.9,
+      "narration": "Can you explain what Kirkagard was doing here? Kirkagard was terrified by the absurd.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "the_strange",
+        "narrativeRelation": "rises_up_to_face_you",
+        "narrativeState": "uncanny",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "shadowSelf"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "kierkegaard"
+        ],
+        "allowedLocations": [
+          "horizon"
+        ],
+        "allowedProps": [
+          "shadowSelf"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "the_strange",
+            "shadowSelf",
+            "kierkegaard",
+            "horizon"
+          ],
+          "relations": [
+            "rises_up_to_face_you"
+          ],
+          "states": [
+            "uncanny"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "kierkegaard",
+            "role": "leap_thinker",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "worried"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 101,
+      "sceneId": "scene-101",
+      "frame": 27565,
+      "seconds": 918.83,
+      "narration": "And you or someone else said, \"Well, everything happens for a reason.\" Oh man, that phrase",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "the_held_pen",
+        "narrativeRelation": "must_be_held_by_no_master",
+        "narrativeState": "seized",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "puppeteer"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "puppeteer"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "the_held_pen",
+            "puppeteer",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "must_be_held_by_no_master"
+          ],
+          "states": [
+            "seized"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 112,
+      "sceneId": "scene-112",
+      "frame": 30452,
+      "seconds": 1015.07,
+      "narration": "The divorce is gone. You've solved the problem by cheating. And Kay says, \"No, we have to keep the divorce alive.\" We must.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "freedom",
+        "narrativeRelation": "is_what_remains",
+        "narrativeState": "affirmed",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "gift"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "horizon"
+        ],
+        "allowedProps": [
+          "gift"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "freedom",
+            "gift",
+            "everyman",
+            "horizon"
+          ],
+          "relations": [
+            "is_what_remains"
+          ],
+          "states": [
+            "affirmed"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 123,
+      "sceneId": "scene-123",
+      "frame": 33260,
+      "seconds": 1108.67,
+      "narration": "Kimuz uses the myth of uritity, right? The absurd only dies if we look away from it. Revolt is the conscious decision to never look away. It's having the certai",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "freedom",
+        "narrativeRelation": "is_what_remains",
+        "narrativeState": "affirmed",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "gift"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "camus"
+        ],
+        "allowedLocations": [
+          "horizon"
+        ],
+        "allowedProps": [
+          "gift"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "freedom",
+            "gift",
+            "camus",
+            "horizon"
+          ],
+          "relations": [
+            "is_what_remains"
+          ],
+          "states": [
+            "affirmed"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "camus",
+            "role": "author_voice",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "worried"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 134,
+      "sceneId": "scene-134",
+      "frame": 36475,
+      "seconds": 1215.83,
+      "narration": "Picture a prisoner on death row. For years, he's been appealing his case. He's been living entirely in the future.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "chains",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "chains"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "chains"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "chains",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 145,
+      "sceneId": "scene-145",
+      "frame": 39680,
+      "seconds": 1322.67,
+      "narration": "fork and you're agonizing over which single dish is the morally correct choice to a massive chaotic all you can eat buffet.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "food",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "food"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "food"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "food",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 156,
+      "sceneId": "scene-156",
+      "frame": 42715,
+      "seconds": 1423.83,
+      "narration": "complete moral apathy? How does Camuse condemn tyranny or murder without appealing to a moral framework he claims doesn't exist? A vital question and we have to",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "chains",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "chains"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "camus"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "chains"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "chains",
+            "camus",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "camus",
+            "role": "author_voice",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 168,
+      "sceneId": "scene-168",
+      "frame": 45903,
+      "seconds": 1530.1,
+      "narration": "crushing weight of your If you cause harm, you cannot go to a confessional, say three prayers, and be wiped clean. You cause harm.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "responsibility",
+        "narrativeRelation": "must_be_carried",
+        "narrativeState": "weighty",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "shield"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "shield"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "responsibility",
+            "shield",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "must_be_carried"
+          ],
+          "states": [
+            "weighty"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "worried"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 179,
+      "sceneId": "scene-179",
+      "frame": 48810,
+      "seconds": 1627,
+      "narration": "because he is sad or unfulfilled. He does it because he wants to consume as much of the world as possible. He is multiplying his experiences.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "heart",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "heart"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "heart"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "heart",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "sad"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 190,
+      "sceneId": "scene-190",
+      "frame": 51387,
+      "seconds": 1712.9,
+      "narration": "They know it's a performance. They know this set is made of cardboard, but the fact that it's makeelieve doesn't make the peers any less wet. Exactly.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "mask",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "mask"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "mask"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "mask",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 201,
+      "sceneId": "scene-201",
+      "frame": 54274,
+      "seconds": 1809.13,
+      "narration": "Kiraov's reasoning is a masterpiece of dark logic. His fundamental premise is this.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "the_strange",
+        "narrativeRelation": "rises_up_to_face_you",
+        "narrativeState": "uncanny",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "shadowSelf"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "kirillov"
+        ],
+        "allowedLocations": [
+          "horizon"
+        ],
+        "allowedProps": [
+          "shadowSelf"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "the_strange",
+            "shadowSelf",
+            "kirillov",
+            "horizon"
+          ],
+          "relations": [
+            "rises_up_to_face_you"
+          ],
+          "states": [
+            "uncanny"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "kirillov",
+            "role": "dark_test_case",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "worried"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 212,
+      "sceneId": "scene-212",
+      "frame": 57354,
+      "seconds": 1911.8,
+      "narration": "are terrified of death. They need proof. They need someone to show them the way out of the fear. Kir believes he must kill himself out of love for humanity to s",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "grave",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "grave"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "grave"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "grave",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "viewer",
+            "state": "worried"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 223,
+      "sceneId": "scene-223",
+      "frame": 60215,
+      "seconds": 2007.17,
+      "narration": "look at the boulder in front of him, and keep Speaking of traps and dead ends, Cis brings up another massive literary figure who almost gets it right, but ultim",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "boulder",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "boulder"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "sisyphus"
+        ],
+        "allowedLocations": [
+          "mountainSlope"
+        ],
+        "allowedProps": [
+          "boulder"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "boulder",
+            "sisyphus",
+            "mountainSlope"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "sisyphus",
+            "role": "mythic_exemplar",
+            "action": "push",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 235,
+      "sceneId": "scene-235",
+      "frame": 63386,
+      "seconds": 2112.87,
+      "narration": "He accepts the absurd as a sign of God's incomprehensibility rather than maintaining it as a sheer unresolvable It is the leap of faith all over again. It is Ki",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "law",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "law"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "law"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "law",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "worried"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 246,
+      "sceneId": "scene-246",
+      "frame": 66724,
+      "seconds": 2224.13,
+      "narration": "silent walk back down to the plane to start again. Cas writes that hour like a breathing space which returns as surely as his suffering.",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "boulder",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "boulder"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "sisyphus"
+        ],
+        "allowedLocations": [
+          "mountainSlope"
+        ],
+        "allowedProps": [
+          "boulder"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "boulder",
+            "sisyphus",
+            "mountainSlope"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "sisyphus",
+            "role": "mythic_exemplar",
+            "action": "walk",
+            "gaze": "motif",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 257,
+      "sceneId": "scene-257",
+      "frame": 69754,
+      "seconds": 2325.13,
+      "narration": "dense silence of the universe. We saw the temptation to take the coward's leap, to invent a false heaven, to commit philosophical suicide like Kirkagard, or to ",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "grave",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "grave"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "kierkegaard"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "grave"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "grave",
+            "kierkegaard",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "kierkegaard",
+            "role": "leap_thinker",
+            "action": "talk",
+            "gaze": "viewer",
+            "state": "neutral"
+          }
+        ]
+      },
+      "review": null
+    },
+    {
+      "index": 268,
+      "sceneId": "scene-268",
+      "frame": 72845,
+      "seconds": 2428.17,
+      "narration": "Are you going to let the absurdity of the world cut you down? Or are you going to pick up that knife, cut the strings of your false hopes, and finally own the b",
+      "contract": {
+        "bookId": "the-myth-of-sisyphus",
+        "sourceChapter": "the-myth-of-sisyphus-notebooklm",
+        "narrativeSubject": "boulder",
+        "narrativeRelation": "is_depicted",
+        "narrativeState": "present",
+        "worldId": "camus-absurdism",
+        "allowedMotifs": [
+          "boulder"
+        ],
+        "forbiddenMotifs": [
+          "caveAllegory",
+          "ringOfGyges",
+          "fiveRegimes",
+          "tripartiteSoul",
+          "civicPolis",
+          "historicalAthens",
+          "mythOfEr",
+          "kallipolis",
+          "shipOfState",
+          "thirtyTyrants"
+        ],
+        "allowedCharacters": [
+          "everyman"
+        ],
+        "allowedLocations": [
+          "manuscript"
+        ],
+        "allowedProps": [
+          "boulder"
+        ],
+        "visualEvidence": {
+          "subjects": [
+            "boulder",
+            "everyman",
+            "manuscript"
+          ],
+          "relations": [
+            "is_depicted"
+          ],
+          "states": [
+            "present"
+          ]
+        },
+        "characterIntent": [
+          {
+            "identity": "everyman",
+            "role": "absurd_man",
+            "action": "talk",
+            "gaze": "motif",
+            "state": "worried"
+          }
+        ]
+      },
+      "review": null
+    }
+  ],
+  "reasonCodes": [
+    "POST_RENDER_REVIEW_MISSING"
+  ]
+}

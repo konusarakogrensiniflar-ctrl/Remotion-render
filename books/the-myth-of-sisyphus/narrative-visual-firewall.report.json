@@ -1,0 +1,10 @@
+{
+  "version": "P1.1",
+  "slug": "the-myth-of-sisyphus",
+  "status": "PASS",
+  "counts": {
+    "scenes": 269,
+    "violations": 0
+  },
+  "violations": []
+}
