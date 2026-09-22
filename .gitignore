@@ -1,0 +1,40 @@
+node_modules
+dist
+.DS_Store
+.env*
+aws.txt
+guncel_env.txt
+*.log
+*.stackdump
+
+# Build & outputs
+out
+build
+.cache/
+tmp/
+scratch/
+
+# Render media assets & temporary files
+public/audio/
+public/scenes/
+public/captions/
+*.mp4
+*.m4a
+*.webm
+*.zip
+
+# Skool pack media
+empire-downfall-skool-pack/
+
+# Never commit: local credentials & render-account config
+render-accounts.json
+nvidia_preview.html
+test_aws_creds.js
+AWS_SESSION_REGISTRY.md
+
+# Session backups, caches & local-only artifacts
+*.bak-*
+.claude/
+__pycache__/
+out_*_chunks/
+*.lnk

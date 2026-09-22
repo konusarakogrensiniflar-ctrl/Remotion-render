@@ -1,0 +1,442 @@
+{
+  "version": "P1.3-prerender",
+  "slug": "the-myth-of-sisyphus",
+  "sampledScenes": 25,
+  "totalScenes": 269,
+  "metrics": {
+    "semanticVisualCoverage": 100,
+    "foreignWorldLeakage": 0,
+    "characterIdentityMismatch": 0,
+    "genericFallbackUsage": 0
+  },
+  "verdict": "PASS",
+  "results": [
+    {
+      "idx": 0,
+      "sceneId": "intro",
+      "narration": "The opening line isn't an academic puzzle. It's a knife. There is only one truly serious philosophical problem and that ",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "grave"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 10,
+      "sceneId": "scene-10",
+      "narration": "And the enemy is not the void, right? The enemy isn't the meaninglessness of the universe. No, the void is just a fact. ",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "chains"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 20,
+      "sceneId": "scene-20",
+      "narration": "We are too busy answering emails, paying bills, catching the train. Exactly. The sheer velocity of the routine protects ",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "chains"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 30,
+      "sceneId": "scene-30",
+      "narration": "The world becomes what he calls dense. You suddenly perceive how foreign and irreducible a stone is, for example. Right.",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "tree"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 40,
+      "sceneId": "scene-40",
+      "narration": "ridiculous. It looks insane. It looks meaningless. You look at him and you wonder why he is alive. If you want a modern ",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "mirror"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 50,
+      "sceneId": "scene-50",
+      "narration": "But Cas clarifies that this is a crucial The world in itself is not absurd. The world is simply unreasonable.",
+      "characters": [
+        "camus"
+      ],
+      "props": [
+        "balance"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 60,
+      "sceneId": "scene-60",
+      "narration": "We reduce the universe to the atom. We reduce the atom to the electron. And we feel this triumph, right? We feel like we",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "lightbulb"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 70,
+      "sceneId": "scene-70",
+      "narration": "not worth living? And that is the exact trap Kimus is trying to help us avoid.",
+      "characters": [
+        "camus"
+      ],
+      "props": [
+        "chains"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 80,
+      "sceneId": "scene-80",
+      "narration": "They reach the waterless deserts where thought reaches its confines. They see the irrationality of the universe perfectl",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "water"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 90,
+      "sceneId": "scene-90",
+      "narration": "He felt that vertigo deeply. To escape it, he demands what Camus refers to as the third sacrifice required by Ignatius L",
+      "characters": [
+        "kierkegaard",
+        "camus"
+      ],
+      "props": [
+        "law"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 100,
+      "sceneId": "scene-100",
+      "narration": "think about the last time you went through something completely unjust like a sudden job loss, a devastating illness, a ",
+      "characters": [
+        "narrator"
+      ],
+      "props": [
+        "storm"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 110,
+      "sceneId": "scene-110",
+      "narration": "It murders reason to create comfort. It is an emotional conjuror's trick. By making the leap, by turning the absurd into",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "chains"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 120,
+      "sceneId": "scene-120",
+      "narration": "Let's break these down because this is where the text turns from a diagnosis into a manifesto. First up, revolt is that ",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "gift"
+      ],
+      "location": "horizon",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 130,
+      "sceneId": "scene-130",
+      "narration": "If you believe your singular purpose is to be a great engineer or a perfect parent or to get into a specific version of ",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "gift"
+      ],
+      "location": "horizon",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 140,
+      "sceneId": "scene-140",
+      "narration": "That is absurd freedom. Losing oneself in that bottomless certainty, feeling released from everything outside that passi",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "gift"
+      ],
+      "location": "horizon",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 150,
+      "sceneId": "scene-150",
+      "narration": "Being aware of one's life, one's revolt, one's freedom, and to the maximum is living and to the maximum. Where lucidity ",
+      "characters": [
+        "narrator"
+      ],
+      "props": [
+        "notes"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 160,
+      "sceneId": "scene-160",
+      "narration": "where the good are rewarded and the wicked are punished, but there isn't one.",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "gift"
+      ],
+      "location": "horizon",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 170,
+      "sceneId": "scene-170",
+      "narration": "No, it isn't. And practically speaking, the absurd man values lucidity and life above all else.",
+      "characters": [
+        "narrator",
+        "everyman"
+      ],
+      "props": [
+        "notes"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 180,
+      "sceneId": "scene-180",
+      "narration": "He knows perfectly well that each love will end and he embraces that limit. He doesn't promise eternal devotion because ",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "heart"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 190,
+      "sceneId": "scene-190",
+      "narration": "They know it's a performance. They know this set is made of cardboard, but the fact that it's makeelieve doesn't make th",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "mask"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 200,
+      "sceneId": "scene-200",
+      "narration": "logical proof. Walk me through his logic because it sounds completely insane at first glance, but it has a very strict i",
+      "characters": [
+        "narrator"
+      ],
+      "props": [
+        "notes"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 210,
+      "sceneId": "scene-210",
+      "narration": "Why win absolute freedom only to immediately leave the world? Carol knows it looks contradictory, but he believes it is ",
+      "characters": [
+        "camus"
+      ],
+      "props": [
+        "grave"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 220,
+      "sceneId": "scene-220",
+      "narration": "The goal isn't to solve the absurd. The goal is to keep it alive. Exactly. Suicide resolves the conflict by eliminating ",
+      "characters": [
+        "everyman"
+      ],
+      "props": [
+        "law"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 230,
+      "sceneId": "scene-230",
+      "narration": "Kofka captures the dense, primitive hostility of the world So why does Kamas say Kafka fails? Because Kamas catches Kafk",
+      "characters": [
+        "kirillov"
+      ],
+      "props": [
+        "law"
+      ],
+      "location": "manuscript",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    },
+    {
+      "idx": 240,
+      "sceneId": "scene-240",
+      "narration": "And the catch is every time he gets the boulder to the very peak, it slips from his grasp and rolls all the way back dow",
+      "characters": [
+        "sisyphus"
+      ],
+      "props": [
+        "boulder"
+      ],
+      "location": "mountainSlope",
+      "semanticMatch": true,
+      "foreignWorldLeak": false,
+      "characterMismatch": false,
+      "genericFallback": false,
+      "issues": []
+    }
+  ]
+}

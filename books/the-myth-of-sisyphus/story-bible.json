@@ -1,0 +1,145 @@
+{
+  "slug": "the-myth-of-sisyphus",
+  "authored": true,
+  "authoredBy": "P1.2 production recovery — read from the 269 scene narrations of this production",
+  "world": {
+    "era": "mid-20th-century French existential philosophy staged through Greek myth and modern life",
+    "worldId": "camus-absurdism",
+    "approxYear": 1942,
+    "setting": "A two-host deep dive into Camus's essay: the lecture table (manuscript), the mythic mountain (mountainSlope), the theatre of the absurd archetypes (stage), and the indifferent sky above them (horizon).",
+    "register": "philosophical essay",
+    "forbid": [
+      "phone",
+      "codeWindow",
+      "laptopMockup",
+      "rocketLaunch",
+      "funnelMetrics",
+      "dollarExchange",
+      "subway",
+      "car",
+      "alarmClock",
+      "medical",
+      "coffee",
+      "classroom",
+      "office",
+      "workstation",
+      "startupGarage",
+      "serverRoom",
+      "pitchStage",
+      "kitchen",
+      "bedroom",
+      "hospital"
+    ]
+  },
+  "cast": {
+    "narrator": {
+      "name": "Narrator",
+      "role": "dialogue_host",
+      "look": "The second voice of the deep dive: dark blazer, open collar, leaning in with questions and pushback.",
+      "variant": { "skin": "#E8B98A", "hair": "#2A1F18", "suit": "#1E3A5F", "shirt": "rgb(252,251,248)", "expression": "neutral", "hairStyle": "short", "glasses": false, "beard": "stubble", "gender": "m", "age": "adult", "outfit": "blazer", "headwear": "none", "accessory": "none", "build": "average", "height": 1, "headScale": 1, "trim": "rgb(30,58,95)", "overlay": [] },
+      "mentions": 269
+    },
+    "everyman": {
+      "name": "The Absurd Man",
+      "role": "absurd_man",
+      "look": "The 'you' the essay is about: shirtsleeves, mid-stride through routine, weariness and lucidity alternating on his face.",
+      "variant": { "skin": "#D9A066", "hair": "#5A3A28", "suit": "#3F6212", "shirt": "rgb(252,251,248)", "expression": "neutral", "hairStyle": "messy", "glasses": false, "beard": "none", "gender": "m", "age": "adult", "outfit": "shirt", "headwear": "none", "accessory": "watch", "build": "average", "height": 1, "headScale": 1, "trim": "rgb(63,98,18)", "overlay": [] },
+      "mentions": 269
+    },
+    "camus": {
+      "name": "Camus",
+      "role": "author_voice",
+      "look": "Albert Camus as the hosts invoke him: trench coat, collar up against the absurd wind.",
+      "variant": { "skin": "#F2C79B", "hair": "#1F1A17", "suit": "#57534E", "shirt": "rgb(252,251,248)", "expression": "neutral", "hairStyle": "short", "glasses": false, "beard": "none", "gender": "m", "age": "adult", "outfit": "trench", "headwear": "none", "accessory": "none", "build": "average", "height": 1, "headScale": 1, "trim": "rgb(87,83,78)", "overlay": [] },
+      "mentions": 120
+    },
+    "kierkegaard": {
+      "name": "Kierkegaard",
+      "role": "leap_thinker",
+      "look": "The leap-of-faith thinkers (Kierkegaard, Chestov, Jaspers, Ignatius): black clerical coat, high collar, vertiginous gaze.",
+      "variant": { "skin": "#EBC8A0", "hair": "#8A6A4A", "suit": "#18181B", "shirt": "rgb(252,251,248)", "expression": "worried", "hairStyle": "long", "glasses": true, "beard": "full", "gender": "m", "age": "old", "outfit": "coat", "headwear": "none", "accessory": "spectacles", "build": "thin", "height": 1, "headScale": 1, "trim": "rgb(24,24,27)", "overlay": [] },
+      "mentions": 30
+    },
+    "donjuan": {
+      "name": "Don Juan",
+      "role": "absurd_archetype",
+      "look": "Camus's seducer archetype: unbuttoned evening shirt, red rose, multiplying the present moment.",
+      "variant": { "skin": "#E8B98A", "hair": "#3A2A1E", "suit": "#7C2D12", "shirt": "rgb(20,20,22)", "expression": "happy", "hairStyle": "slick", "glasses": false, "beard": "goatee", "gender": "m", "age": "young", "outfit": "evening", "headwear": "none", "accessory": "rose", "build": "average", "height": 1, "headScale": 1, "trim": "rgb(124,45,18)", "overlay": [] },
+      "mentions": 10
+    },
+    "kirillov": {
+      "name": "Kirillov",
+      "role": "dark_test_case",
+      "look": "Dostoevsky's engineer and Kafka's accused: grey workman's tunic, lamp-pale face, holding the pen of his own proof.",
+      "variant": { "skin": "#D9C8B8", "hair": "#4A4238", "suit": "#44403C", "shirt": "rgb(230,225,215)", "expression": "worried", "hairStyle": "short", "glasses": false, "beard": "stubble", "gender": "m", "age": "adult", "outfit": "tunic", "headwear": "none", "accessory": "none", "build": "thin", "height": 1, "headScale": 1, "trim": "rgb(68,64,60)", "overlay": [] },
+      "mentions": 45
+    },
+    "sisyphus": {
+      "name": "Sisyphus",
+      "role": "mythic_exemplar",
+      "look": "The condemned man of the myth: bare-armed laborer in a stone-grey tunic, palms raw against the rock, the defiant smile.",
+      "variant": { "skin": "#C68E5E", "hair": "#2E2620", "suit": "#78716C", "shirt": "rgb(214,205,190)", "expression": "happy", "hairStyle": "wild", "glasses": false, "beard": "full", "gender": "m", "age": "adult", "outfit": "tunic", "headwear": "headband", "accessory": "rope", "build": "heavy", "height": 1.08, "headScale": 1, "trim": "rgb(120,113,108)", "overlay": [] },
+      "mentions": 30
+    }
+  },
+  "places": {
+    "manuscript": {
+      "set": "manuscript",
+      "look": "The lecture table: paper-grain field where the hosts dissect the essay's claims.",
+      "mentions": 120
+    },
+    "mountainSlope": {
+      "set": "mountainSlope",
+      "look": "The mythic slope: an unyielding grey incline under a hard sky, the boulder's whole world.",
+      "mentions": 40
+    },
+    "stage": {
+      "set": "stage",
+      "look": "The theatre of the absurd archetypes: footlights and cardboard sets where Don Juan, the actor and the conqueror play.",
+      "mentions": 45
+    },
+    "horizon": {
+      "set": "horizon",
+      "look": "The indifferent world itself: open sky and raw ground with no intent in it.",
+      "mentions": 64
+    }
+  },
+  "objects": [],
+  "visualProvenance": {
+    "bookId": "the-myth-of-sisyphus",
+    "worldId": "camus-absurdism",
+    "allowedMotifs": ["boulder", "mask", "food", "law", "chains", "fire", "grave", "target", "lightbulb", "mirror", "heart", "star", "water", "storm", "tree", "hourglass", "ledge", "war", "shield", "notes", "clock", "game", "gift", "puppeteer", "shadowSelf", "compass", "crack", "book", "balance", "photo"],
+    "forbiddenMotifs": ["caveAllegory", "ringOfGyges", "fiveRegimes", "tripartiteSoul", "civicPolis", "historicalAthens", "mythOfEr", "kallipolis", "shipOfState", "thirtyTyrants"],
+    "allowedCharacters": ["narrator", "everyman", "camus", "kierkegaard", "donjuan", "kirillov", "sisyphus"],
+    "allowedLocations": ["manuscript", "mountainSlope", "stage", "horizon"],
+    "allowedProps": ["boulder", "mask", "food", "law", "chains", "fire", "grave", "target", "lightbulb", "mirror", "heart", "star", "water", "storm", "tree", "hourglass", "ledge", "war", "shield", "notes", "clock", "game", "gift", "puppeteer", "shadowSelf", "compass", "crack", "book", "balance", "photo"]
+  },
+  "spine": [
+    {
+      "act": "setup",
+      "fromFrame": 2,
+      "claim": "Suicide is the one serious philosophical problem; the absurd is a knife, not a puzzle."
+    },
+    {
+      "act": "development",
+      "fromFrame": 14328,
+      "claim": "Weariness, the dense world, and the exact definition of the absurd."
+    },
+    {
+      "act": "turn",
+      "fromFrame": 28085,
+      "claim": "Philosophical suicide refused; revolt, freedom and responsibility affirmed."
+    },
+    {
+      "act": "consequence",
+      "fromFrame": 42943,
+      "claim": "The absurd archetypes and the test cases that fail them (Kirillov, Kafka)."
+    },
+    {
+      "act": "close",
+      "fromFrame": 58387,
+      "claim": "Sisyphus: the descent owned, the struggle enough — one must imagine him happy."
+    }
+  ],
+  "authored": true
+}
